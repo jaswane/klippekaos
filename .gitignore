@@ -3,3 +3,6 @@ outputs/
 .sites-runtime/
 node_modules/
 .vercel/
+
+# Build copies of the original PNG assets
+dist/assets/

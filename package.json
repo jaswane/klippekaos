@@ -4,6 +4,8 @@
   "private": true,
   "description": "Klippekaos Prototype 04 – a static Canvas arcade game",
   "scripts": {
+    "predev": "npm run build",
+    "prestart": "npm run build",
     "dev": "node scripts/serve.cjs",
     "start": "node scripts/serve.cjs",
     "build": "node scripts/build.cjs",

@@ -45,3 +45,7 @@ main{margin-top:20px}header{margin-bottom:16px}.tools{display:flex;align-items:c
 
 /* QA: keep the completion heading visible and contain portrait scrolling. */
 .field #result{position:fixed;inset:0;z-index:12;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}.field #result .card{max-height:calc(100dvh - 32px);overscroll-behavior:contain}.portrait-prompt{overflow:hidden;overscroll-behavior:none}.rotate-prompt{touch-action:none}.touch-device #gameOver{touch-action:pan-y}.touch-device .veil{overscroll-behavior:contain}
+
+/* P04.1: reserve the PNG logo space before it loads. */
+.menu-copy h1.brand-logo{margin:14px 0 20px;line-height:1;letter-spacing:normal}.brand-logo img{display:block;width:min(280px,100%);height:auto;aspect-ratio:1448/1086}.menu-copy h1.brand-logo span{margin-top:8px}@media(orientation:landscape) and (max-height:550px){.touch-device .menu-copy h1.brand-logo{margin:8px 0 14px}.touch-device .brand-logo img{width:160px}}
+@media(min-width:901px) and (max-height:800px){.brand-logo img{width:220px}}
