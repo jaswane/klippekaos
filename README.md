@@ -1,8 +1,8 @@
 # KlippeKaos – Gressklipperspillet
 
-**Prototype 04** er et lite plenklippespill sett ovenfra, laget med HTML, CSS og Canvas/JavaScript. Et spillprosjekt fra Swane Creative.
+**Prototype 05** er et gratis nettspill om å klippe plenen, laget av Swane Creative med HTML, CSS og Canvas/JavaScript.
 
-Klipp tre ulike hager, bruk boost og slå egne rekorder. I Tidspress er målet: «Hvor mye klarer du å klippe på 60 sekunder?» Kurvehagen har tungt gress og markblomster som skal skånes. Styr unna katten – treff avslutter runden. Jordveps kan dukke opp flere ganger.
+Karriere har fem nivåer: Den lille hagen (styring og vanlig plen), L-hagen (tungt gress), Kurvehagen (katt), Blomsterhagen (markblomster) og Sommerhagen (jordveps). Fullføring låser opp neste nivå lokalt. Testhagene og Tidspress på 60 sekunder er separate valg.
 
 ## Kjør lokalt
 
@@ -12,9 +12,9 @@ Krever Node.js 20 eller nyere. Ingen eksterne pakkeavhengigheter.
 npm run dev
 ```
 
-Åpne http://127.0.0.1:4173. W/S eller piltastene kjører frem og rygger; A/D eller venstre/høyre svinger. Shift gir fartsboost, E/Space gir manøverboost, Esc pauser. Standard gamepad støttes.
+Åpne http://127.0.0.1:4173. W/S eller opp/ned kjører frem og rygger; A/D eller venstre/høyre svinger. Shift gir fartsboost, E/Space gir manøverboost og Esc pauser. Standard gamepad støttes.
 
-På mobil/nettbrett: hold enheten liggende, styr med venstre joystick og bruk gass/revers og boostknappene til høyre. Musestyrte hybrider viser ikke touchkontroller før faktisk berøring. Fullskjermknappen vises der nettleseren støtter det.
+Mobil/nettbrett spilles liggende med joystick og gass/revers. Musestyrte hybrider får touchkontroller først ved faktisk berøring. Portrait viser rotasjonsvarsel og pauser pågående spill.
 
 ## Test og bygg
 
@@ -23,16 +23,20 @@ npm test
 npm run build
 ```
 
-P04 har **58 automatiske tester** for grunnmekanikk, terreng, hendelser og input. Byggkommandoen validerer JavaScript, HTML-ID-er og lokale ressursreferanser. Filene i `dist/` er redigerbare, ferdige statiske spillfiler.
+P05 har **72/72 beståtte tester**: 7 P01, 17 P02, 15 P03, 19 P04 og 14 P05. Byggkommandoen validerer JavaScript, HTML-ID-er og lokale ressursreferanser. Se [DESIGN.md](DESIGN.md) for implementert mekanikk og QA-status.
 
-Nettleser-QA dekker desktop, laptop og emulerte mobil-/nettbrettprofiler, rotasjon, safe-area-marger, pause, restart, tap og resultatkort. Fysisk mobil/iPad, samtidig tommelstyring og menneskelig fullføring rundt markblomstene gjenstår. Se [DESIGN.md](DESIGN.md) for mekanikk og QA-detaljer.
+## Lagring og støtte
+
+Nivåopplåsing og topp fem per bane/modus lagres i localStorage under `klippekaos-p05`. Kvalifiserende forsøk registreres med nøyaktig tre initialer (A–Z/0–9). P04-data migreres ikke og overskrives ikke. Innstillinger bruker `klippekaos-settings`. Data følger ikke automatisk med til en annen nettleser eller adresse.
+
+«Om & støtte» finnes i hovedmenyen og pausemenyen: kontakt@swanecreative.no, Vipps #63338 og [Swane Creatives støtteside](https://www.swanecreative.no/stott). Støttelenken åpner separat; runden forblir pauset. QR-koden er en lokal kopi av originalen, ikke en hotlink.
 
 ## Vercel og filer
 
 Importer repoets rot i Vercel. `vercel.json` angir `npm run build` og output-mappen `dist`. Ingen backend, database eller miljøvariabler kreves.
 
-- `dist/`: HTML, CSS, spillkode og den separate touchadapteren `input.js`.
-- `scripts/`, `tests/`: lokal server, validering og P01–P04-tester.
-- `app/icon.png`, `public/klippe-kaos-logo.png`: medfølgende, uendrede grafikkfiler. De ligger utenfor `dist/` og brukes ikke automatisk av det statiske oppsettet; siden bruker tekstlogo og inline SVG-favicon.
+- `dist/`: redigerbare statiske spillfiler, inkludert `input.js` og `profile.js`.
+- `scripts/`, `tests/`: lokal server, byggvalidering og P01–P05-tester.
+- `app/icon.png`, `public/klippe-kaos-logo.png`, `public/vippsqr.png`: kopieres til `dist/assets/` ved build. HTML refererer eksplisitt til PNG-logo, favicon/apple-touch-icon og QR. Ingen Next.js metadata-routing brukes.
 
-Rekorder lagres separat per hage/modus i nettleseren under `klippekaos-p04`; innstillinger under `klippekaos-settings`. P03-data overskrives ikke. Rekorder følger ikke automatisk med til en annen nettleser eller adresse. Tap ved katt gir ingen rekordlagring.
+Fysisk mobil/iPad, multitouch, virtuelt tastatur, QR-skanning og menneskelig fullføring rundt markblomstene bør fortsatt testes på maskinvare.

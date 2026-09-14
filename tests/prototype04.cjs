@@ -1,3 +1,4 @@
+// P05: cat route tests isolate wasps; coordinated timing is tested in prototype05.
 'use strict';
 const assert=require('node:assert/strict');
 const {Game,P,levels,legal,mowable,wildflowerAt,terrainTuning,catRoutes,recordRun,padInput}=require('../dist/core.js');
@@ -62,7 +63,7 @@ test('Score is explained by raw deductions; heavy grass and decorative bees have
  g.flowerCut=g.flowerTotal/2;const r=g.result();assert.equal(r.breakdown.flowers,90);assert.equal(r.score,Math.max(0,r.breakdown.base-Object.entries(r.breakdown).filter(([k])=>k!=='base').reduce((sum,[,v])=>sum+v,0)));
 });
 test('Every cat route can cross without affecting a mower away from the route',()=>{
- for(const route of catRoutes){const g=new Game('normal','garden1',undefined,{catRoute:route.id});g.started=true;g.time=16;g.x=100;g.y=500;run(g,10);assert(g.cat.finished,route.id);assert(!g.done);assert(Number.isFinite(g.cat.angle));}
+ for(const route of catRoutes){const g=new Game('normal','garden1',undefined,{catRoute:route.id});g.nextWaspAt=Infinity;g.started=true;g.time=16;g.x=100;g.y=500;run(g,10);assert(g.cat.finished,route.id);assert(!g.done);assert(Number.isFinite(g.cat.angle));}
 });
 test('Seeded routes and movement are repeatable; fixed route overrides seed',()=>{
  const seen=new Set();for(let seed=0;seed<30;seed++){const a=new Game('normal','garden3',undefined,{seed}),b=new Game('normal','garden3',undefined,{seed});seen.add(a.cat.route.id);run(a,20,{forward:true});run(b,20,{forward:true});assert.deepEqual(a.cat,b.cat);}
