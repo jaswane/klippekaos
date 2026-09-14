@@ -116,3 +116,10 @@ body:has(#play:not([hidden])){background:var(--game-background)}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media(min-width:768px) and (min-height:600px){.support-qr{display:block}}
 @media(max-height:500px){#aboutDialog{padding:18px 22px}.support-section{margin-top:12px;padding-top:12px}#pause .card{padding:18px 26px;overflow:auto}#pause .card h2{margin:8px 0}#pause .card button{padding:10px}}
+
+/* P05.1: every event uses the same readable, unobtrusive field text. */
+#play .field #notice,#play .field #notice.hazard-notice{top:8px;background:transparent;color:#fff;border:0;border-radius:0;box-shadow:none;font-size:28px;font-weight:800;line-height:1.12;padding:2px 8px;text-shadow:0 2px 4px #000,0 0 3px #000,1px 0 1px #173b2b;max-width:calc(100% - 16px);letter-spacing:.4px}
+.round-status{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:26px}.round-status .mode-goal{margin:2px 0}.finish-early{flex-shrink:0;border:1px solid #a5bc83;border-radius:6px;padding:5px 10px;background:#e1ecb5;color:#203d2a;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}.finish-early:disabled{opacity:.5}
+#play .stats{gap:20px}#play .stats>div{min-width:0}.live-score strong{font-variant-numeric:tabular-nums;min-width:4.5ch}
+@media(max-width:900px),(max-height:500px){#play .field #notice,#play .field #notice.hazard-notice{font-size:20px;top:5px}#play .stats{gap:14px}.round-status{min-height:25px}.round-status .mode-goal{font-size:10px}.finish-early{font-size:12px;padding:4px 8px}}
+@media(max-height:500px){#play header .stats strong{font-size:20px}#play header .stats span{font-size:9px}#play header{gap:10px}}

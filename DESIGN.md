@@ -1,4 +1,4 @@
-# Prototype 05 – implementert status
+# Prototype 05 / 05.1 – implementert status
 
 P05 bygger på P04.2 i samme statiske Canvas-spill. Grunnfysikk, baneformatet 900×580, kollisjonsmodell, scoring og fullføringskravet på 99,5 % videreføres. Ingen backend, økonomi eller nye klippere.
 
@@ -47,3 +47,12 @@ Touchdeteksjon, hybrid-desktop, portrait-pause, rotasjonsvarsel og safe areas vi
 - «Halveis!» er utløst gjennom faktisk klipping med automatiserte tastaturinput. Posisjon, tid og coverage er kontrollert uendret gjennom støtte-dialog og tilbake til pause.
 
 Gjenstående fysisk QA: iPhone/iPad multitouch og virtuelt tastatur, safe areas/rotasjon i Safari, lyd/gamepad, QR-skanning og menneskelig reaksjon/fullføring rundt farer og markblomster. Emulering og geometriske tester beviser ikke spillkomfort på maskinvare.
+
+## P05.1 – game feel
+
+- Alle hendelsesvarsler er hvite og transparente, 28 px på desktop og 20 px på mobil/lave skjermer. «HALVVEIS!» beholder 1,8 sekunders varighet.
+- Live POENG bruker samme `Game.result()` som sluttscoren.
+- Beige Blender, grå og svart/hvit katt velges fra rundens seed. Varianten er stabil gjennom runden; hitbox, fart og ruter er like. Blender varsles med «PASS DEG FOR BLENDER!».
+- Karriere tilbyr «Ferdig nå» fra 95 % til 99,5 %. Trekk: `max(0, round((99.5 - dekning_i_prosent) * 200))`. Faktisk dekning og trekket vises i resultatet; nivået fullføres og neste nivå kan låses opp. Tidspress og testhagene får ikke knappen. Normal automatisk fullføring er uendret.
+- Eksisterende halvveis-/kattlyd har egne korte toner; jordveps har fått syntetisk buzz. Én lyd per hendelse, via eksisterende AudioContext og lydinnstillinger.
+- 80/80 tester, build og diffkontroll består. Desktop/laptop/mobil landscape er kontrollert i nettleser, inkludert 95/97/99 % og normal fullføring. Fysisk lydnivå og touchfølelse gjenstår.

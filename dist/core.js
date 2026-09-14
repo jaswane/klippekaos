@@ -55,12 +55,12 @@ function mowable(x,y,garden='garden1'){const level=levelFor(garden);return !wild
 class Game{
  constructor(mode='normal',garden='garden1',mower=starterMower,events={}){this.eventOptions={...events};this.mower={...starterMower,...mower};this.reset(mode,garden);}
  reset(mode=this.mode||'normal',garden=this.garden||'garden1'){
-  this.level=levelFor(garden);this.garden=this.level.id;this.mechanics={...this.level.mechanics};this.hazardUntil=0;this.nextCatAt=18;
+  this.level=levelFor(garden);this.garden=this.level.id;this.mechanics={...this.level.mechanics};this.hazardUntil=0;this.nextCatAt=18;this.earlyPenalty=0;
   this.mode=mode==='timed'?'timed':'normal';this.x=this.level.start?.x??101;this.y=this.level.start?.y??482;this.angle=-Math.PI/2;this.speed=0;this.steer=0;this.time=0;this.started=false;this.done=false;this.reason=null;this.travel=0;this.cut=0;this.repeat=0;this.total=0;
   this.energy={speed:Math.min(this.mower.boostStart,this.mower.boostCapacity),turn:Math.min(this.mower.boostStart,this.mower.boostCapacity)};this.active={speed:false,turn:false};this.pickups=this.mechanics.pickups?this.level.pickups.map(p=>({...p,taken:false})):[];this.random=seededRandom((this.eventOptions.seed??0)^0x5a17);this.waspSpawns=[];this.waspStings=0;this.nextWaspAt=eventTuning.waspFirstMin+this.random()*(eventTuning.waspFirstMax-eventTuning.waspFirstMin);this.nest={x:0,y:0,originX:0,originY:0,revealed:false,active:false,age:0,caught:false};this.penalty=0;this.collisions=0;this.contact=false;this.impactX=this.x;this.impactY=this.y;this.flash=0;this.milestone=0;this.damage=[];this.idleTime=0;this.idleX=this.x;this.idleY=this.y;this.damageWarned=false;this.damageGrace=0;this.recentCells=[];
   this.find={x:210,y:382,revealed:false,collected:false};this.cat={x:-30,y:280,active:false,warned:false,finished:false,stopped:false,side:0};
   const route=catRoutes.find(r=>r.id===this.eventOptions.catRoute)||catRoutes[seededRoute(this.eventOptions.seed)];
-  this.cat={...this.cat,x:route.from[0],y:route.from[1],route,angle:Math.atan2(route.to[1]-route.from[1],route.to[0]-route.from[0])};
+  this.cat={...this.cat,variant:['blender','grey','tuxedo'][seededRoute((this.eventOptions.seed??0)^0x3197)%3],x:route.from[0],y:route.from[1],route,angle:Math.atan2(route.to[1]-route.from[1],route.to[0]-route.from[0])};
   this.heavyCut=0;this.heavyTotal=0;this.heavyLoad=0;this.flowerCut=0;this.flowerTotal=0;this.flowerNoticeAt=-Infinity;
   this.nx=P.width/P.cell;this.ny=P.height/P.cell;this.mask=new Uint8Array(this.nx*this.ny);this.last=new Float32Array(this.mask.length);this.last.fill(-1e6);this.terrain=new Uint8Array(this.mask.length);this.flowers=new Uint8Array(this.mask.length);
   for(let y=0;y<this.ny;y++)for(let x=0;x<this.nx;x++)if(mowable((x+.5)*P.cell,(y+.5)*P.cell,this.garden)){this.mask[y*this.nx+x]=1;this.total++;if(this.mechanics.heavy&&inPatch((x+.5)*P.cell,(y+.5)*P.cell,this.level.heavy)){this.terrain[y*this.nx+x]=1;this.heavyTotal++;}}
@@ -81,11 +81,13 @@ class Game{
   for(const offset of [-P.deck*.5,0,P.deck*.5]){const x=Math.floor((this.x+Math.cos(a)*(P.deck+P.cell*2)-Math.sin(a)*offset)/P.cell),y=Math.floor((this.y+Math.sin(a)*(P.deck+P.cell*2)+Math.cos(a)*offset)/P.cell),i=y*this.nx+x;if(x>=0&&x<this.nx&&y>=0&&y<this.ny&&this.mask[i]===1&&this.terrain[i])load++;}
   return load/3;
  }
+ earlyFinishPenalty(){return !this.done&&this.mode==='normal'&&this.level.stage&&this.coverage>=.95&&this.coverage<P.finish?Math.max(0,Math.round((P.finish-this.coverage)*20000)):null;}
+ finishEarly(){const penalty=this.earlyFinishPenalty();if(penalty===null)return false;this.earlyPenalty=penalty;this.done=true;this.reason='early-complete';this.speed=0;this.active={speed:false,turn:false};return true;}
  result(){
-  const failed=this.reason==='cat-collision',completed=!failed&&this.coverage>=P.finish,coverage=completed?1:this.coverage;
+  const failed=this.reason==='cat-collision',normalComplete=!failed&&this.coverage>=P.finish,completed=normalComplete||this.reason==='early-complete',coverage=normalComplete?1:this.coverage;
   const potential=this.mode==='timed'?10000:8500+1500*clamp((this.level.timeTarget-this.time)/(this.level.timeTarget-60),0,1);
-  const breakdown={base:Math.round(coverage*potential),overlap:Math.round(this.overlap*1500),collisions:Math.min(250,this.collisions*25),damage:Math.min(300,this.damage.length*60),wasps:this.penalty,flowers:Math.round(terrainTuning.wildflowerPenalty*(this.flowerTotal?this.flowerCut/this.flowerTotal:0))};
-  const score=Math.max(0,breakdown.base-breakdown.overlap-breakdown.collisions-breakdown.damage-breakdown.wasps-breakdown.flowers);
+  const breakdown={base:Math.round(coverage*potential),overlap:Math.round(this.overlap*1500),collisions:Math.min(250,this.collisions*25),damage:Math.min(300,this.damage.length*60),earlyFinish:this.earlyPenalty,wasps:this.penalty,flowers:Math.round(terrainTuning.wildflowerPenalty*(this.flowerTotal?this.flowerCut/this.flowerTotal:0))};
+  const score=Math.max(0,breakdown.base-breakdown.overlap-breakdown.collisions-breakdown.damage-breakdown.wasps-breakdown.flowers-breakdown.earlyFinish);
   return {mode:this.mode,garden:this.garden,score,rank:score>=9000?'S':score>=7500?'A':score>=5500?'B':score>=3500?'C':'D',time:this.time,coverage,actualCoverage:this.coverage,overlap:this.overlap,collisions:this.collisions,damage:this.damage.length,failed,reason:this.reason,waspStings:this.waspStings,penalty:this.penalty,heavyCut:this.heavyCut,heavyTotal:this.heavyTotal,flowerCut:this.flowerCut,flowerTotal:this.flowerTotal,breakdown,completed};
  }
  updateCat(dt,events){

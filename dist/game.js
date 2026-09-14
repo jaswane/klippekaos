@@ -27,7 +27,7 @@ const sound={
  this.noise=a.createBufferSource();this.noise.buffer=buffer;this.noise.loop=true;this.filter=a.createBiquadFilter();this.filter.type='bandpass';this.filter.frequency.value=1700;this.filter.Q.value=.6;this.cutGain=a.createGain();this.cutGain.gain.value=0;this.noise.connect(this.filter).connect(this.cutGain).connect(this.master);this.noise.start();this.boostVoices={};for(const type of ['speed','turn']){const o=a.createOscillator(),v=a.createGain();o.type=type==='speed'?'sine':'triangle';o.frequency.value=type==='speed'?190:430;v.gain.value=0;o.connect(v).connect(this.master);o.start();this.boostVoices[type]={o,v};}}
  if(this.a.state==='suspended')this.a.resume().catch(()=>{});}catch{this.enabled=false;$('sound').textContent='Lyd utilgjengelig';$('sound').setAttribute('aria-pressed','false');}},
  update(){if(!this.a)return;const t=this.a.currentTime,on=this.enabled&&!onMenu&&!paused&&game.started&&!game.done;this.master.gain.setTargetAtTime(this.enabled?settings.volume*.65:0,t,.04);this.motor.frequency.setTargetAtTime(40+Math.abs(game.speed)*.62-game.heavyLoad*15,t,.07);this.motorGain.gain.setTargetAtTime(on?.08+Math.abs(game.speed)/P.maxSpeed*.04+game.heavyLoad*.025:0,t,.07);this.cutGain.gain.setTargetAtTime(on?Math.min(.18,cutLevel*.12):0,t,.045);for(const type of ['speed','turn']){const voice=this.boostVoices[type];voice.v.gain.setTargetAtTime(on&&game.active[type]?.045:0,t,.045);voice.o.frequency.setTargetAtTime(type==='speed'?190+Math.abs(game.speed)*.6:410+Math.abs(game.steer)*100,t,.08);}},
- chime(type){if(!this.enabled||!this.a)return;const a=this.a,o=a.createOscillator(),gain=a.createGain();o.type='sine';o.frequency.value=['sting','damage'].includes(type)?180:type==='collision'?90:type==='pickup-turn'?820:type==='pickup-speed'?660:650;gain.gain.setValueAtTime(.055,a.currentTime);gain.gain.exponentialRampToValueAtTime(.001,a.currentTime+.24);o.frequency.exponentialRampToValueAtTime(type==='sting'?95:900,a.currentTime+.18);o.connect(gain).connect(this.master);o.start();o.stop(a.currentTime+.25);o.onended=()=>{o.disconnect();gain.disconnect();};}
+ chime(type){if(!this.enabled||!this.a)return;const a=this.a,o=a.createOscillator(),gain=a.createGain();o.type=type==='wasps'?'sawtooth':type==='cat-warning'?'triangle':'sine';o.frequency.value=type==='wasps'?150:type==='cat-warning'?520:type==='milestone-50'?880:['sting','damage'].includes(type)?180:type==='collision'?90:type==='pickup-turn'?820:type==='pickup-speed'?660:650;gain.gain.setValueAtTime(.055,a.currentTime);gain.gain.exponentialRampToValueAtTime(.001,a.currentTime+.24);o.frequency.exponentialRampToValueAtTime(type==='wasps'?110:type==='cat-warning'?740:type==='milestone-50'?1175:type==='sting'?95:900,a.currentTime+.18);o.connect(gain).connect(this.master);o.start();o.stop(a.currentTime+.25);o.onended=()=>{o.disconnect();gain.disconnect();};}
 };
 function lawnPath(c){c.beginPath();game.level.polygon.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath();}
 
@@ -88,16 +88,16 @@ function eventFeedback(event){
  else if(event==='sting')notify('VEPS! Samlet trekk: −'+game.penalty+' poeng',2);
  else if(event==='escaped')notify('Du kom deg unna',2);
  else if(event.startsWith('pickup-'))notify((event==='pickup-speed'?'BOOST · Fart':'BOOST · Manøver')+' fylt på',2);
- else if(event.startsWith('milestone-'))notify(event==='milestone-50'?'Halveis!':event.split('-')[1]+' % · Fin flyt!',1.8);
+ else if(event.startsWith('milestone-'))notify(event==='milestone-50'?'HALVVEIS!':event.split('-')[1]+' % · Fin flyt!',1.8);
  if(event==='damage-warning')notify('Aggregatet varmer plenen · kjør litt videre',2);
  if(event==='damage')notify('En slitt flekk · −60 poeng',2.5);
  if(event==='find')notify('Noe lå under gresset!',1.5);
  if(event==='find-collected')notify('Liten energireserve! +0,6 s til begge',2.5);
- if(event==='cat-warning')notify('PASS PÅ KATTEN!',2.5);
+ if(event==='cat-warning')notify(game.cat.variant==='blender'?'PASS DEG FOR BLENDER!':'PASS PÅ KATTEN!',2.5);
 
  if(event==='cat-gone')notify('Pus er trygt videre',1.5);
  if(event.startsWith('pickup-')||event==='find-collected')rings.push({x:game.x,y:game.y,life:.65,color:event==='pickup-turn'?'#bd9bdd':'#bce8ad'});
- if(event!=='wasps')sound.chime(event);
+ sound.chime(event);
 }
 function cutVisual(e){
  if(!e)return;for(const event of e.events)eventFeedback(event);if(!e.moved)return;
@@ -112,7 +112,7 @@ function draw(){const obstacles=game.level.obstacles;ctx.clearRect(0,0,900,580);
 ctx.save();lawnPath(ctx);ctx.clip();for(const p of game.damage){circle(ctx,p.x,p.y,P.damageRadius,'#a5824e');for(let i=0;i<8;i++){let a=i*2.4;circle(ctx,p.x+Math.cos(a)*7,p.y+Math.sin(a)*7,2,'#bc9b65');}}ctx.restore();
 if(game.idleTime>=P.damageWarn&&!game.damage.some(p=>Math.hypot(game.x-p.x,game.y-p.y)<24)){ctx.strokeStyle='#e5b953';ctx.lineWidth=2;ctx.beginPath();ctx.arc(game.x,game.y,26,0,Math.PI*2*Math.min(1,(game.idleTime-P.damageWarn)/(P.damageAfter-P.damageWarn)));ctx.stroke();}
 if(game.find.revealed&&!game.find.collected){circle(ctx,game.find.x,game.find.y,10,'#e2bd56');ctx.fillStyle='#fffce5';ctx.textAlign='center';ctx.font='bold 14px Segoe UI';ctx.fillText('+',game.find.x,game.find.y+5);}
-if(game.cat.active){const c=game.cat;ctx.save();ctx.translate(c.x,c.y);ctx.rotate(c.angle);ctx.strokeStyle='#f1e8cc';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(-14,-8,27,16,8);ctx.stroke();ctx.beginPath();ctx.arc(12,0,8,0,Math.PI*2);ctx.stroke();const stride=settings.reduced?0:Math.sin(game.time*24);ctx.scale(1+stride*.035,1-stride*.025);ctx.strokeStyle='#656b68';ctx.lineWidth=3;for(const side of [-1,1])for(const front of [-8,8]){ctx.beginPath();ctx.moveTo(front,side*5);ctx.lineTo(front+stride*(front>0?4:-4)*side,side*11);ctx.stroke();}ctx.strokeStyle='#64666b';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-10,0);ctx.quadraticCurveTo(-25,-15+stride*4,-25,stride*5);ctx.stroke();rounded(ctx,-13,-7,24,14,7,'#85898b');circle(ctx,12,0,7,'#85898b');ctx.fillStyle='#85898b';ctx.beginPath();ctx.moveTo(9,-4);ctx.lineTo(9,-12);ctx.lineTo(15,-6);ctx.fill();ctx.beginPath();ctx.moveTo(10,4);ctx.lineTo(10,12);ctx.lineTo(16,6);ctx.fill();circle(ctx,15,-3,1.2,'#f2d77e');circle(ctx,15,3,1.2,'#f2d77e');ctx.restore();}
+if(game.cat.active){const c=game.cat,fur=c.variant==='blender'?'#d6b58b':c.variant==='tuxedo'?'#303636':'#85898b',dark=c.variant==='blender'?'#9a795b':c.variant==='tuxedo'?'#202b29':'#656b68';ctx.save();ctx.translate(c.x,c.y);ctx.rotate(c.angle);ctx.strokeStyle='#f1e8cc';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(-14,-8,27,16,8);ctx.stroke();ctx.beginPath();ctx.arc(12,0,8,0,Math.PI*2);ctx.stroke();const stride=settings.reduced?0:Math.sin(game.time*24);ctx.scale(1+stride*.035,1-stride*.025);ctx.strokeStyle=dark;ctx.lineWidth=3;for(const side of [-1,1])for(const front of [-8,8]){ctx.beginPath();ctx.moveTo(front,side*5);ctx.lineTo(front+stride*(front>0?4:-4)*side,side*11);ctx.stroke();}ctx.strokeStyle=dark;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-10,0);ctx.quadraticCurveTo(-25,-15+stride*4,-25,stride*5);ctx.stroke();rounded(ctx,-13,-7,24,14,7,fur);circle(ctx,12,0,7,fur);if(c.variant==='tuxedo'){rounded(ctx,1,-5,9,10,4,'#f1eee1');circle(ctx,15,0,4,'#f1eee1');}ctx.fillStyle=fur;ctx.beginPath();ctx.moveTo(9,-4);ctx.lineTo(9,-12);ctx.lineTo(15,-6);ctx.fill();ctx.beginPath();ctx.moveTo(10,4);ctx.lineTo(10,12);ctx.lineTo(16,6);ctx.fill();circle(ctx,15,-3,1.2,'#f2d77e');circle(ctx,15,3,1.2,'#f2d77e');ctx.restore();}
 // Ambient bees are presentation only; they never enter Game.step or score.
 for(const p of game.level.wildflowers||[]){ctx.save();ctx.strokeStyle='#f5e6b8';ctx.lineWidth=1.5;ctx.setLineDash([3,6]);ctx.beginPath();ctx.ellipse(p.x,p.y,p.rx+4,p.ry+4,0,0,Math.PI*2);ctx.stroke();ctx.restore();ctx.fillStyle='#f8f1d9';ctx.font='600 11px Segoe UI';ctx.textAlign='center';ctx.fillText('LA BLOMSTENE STÅ',p.x,p.y-p.ry-12);for(let i=0;i<3;i++){const a=(settings.reduced?0:game.time)*1.5+i*2.1,x=p.x+Math.cos(a)*(p.rx+8),y=p.y+Math.sin(a)*p.ry;circle(ctx,x-2,y-2,2,'#ffffffaa');circle(ctx,x+2,y-2,2,'#ffffffaa');circle(ctx,x,y,2,'#e7c25c');ctx.fillStyle='#4c4935';ctx.fillRect(x,y-1,1,2);}}
 for(const r of rings){ctx.globalAlpha=r.life/.65;ctx.strokeStyle=r.color;ctx.lineWidth=3;ctx.beginPath();ctx.arc(r.x,r.y,20+(1-r.life/.65)*32,0,Math.PI*2);ctx.stroke();}ctx.globalAlpha=1;
@@ -134,6 +134,9 @@ function time(t){const seconds=Math.max(0,Math.floor(t+1e-7));return Math.floor(
 function pct(n){return(n*100).toFixed(1).replace('.',',');}
 function scoreText(n){return Math.round(n).toLocaleString('nb-NO');}
 function hud(){
+ $('liveScore').textContent=scoreText(game.result().score);
+ const early=game.earlyFinishPenalty();$('finishEarly').hidden=early===null;$('finishEarly').disabled=paused||modalOpen();if(early!==null)$('finishEarly').textContent='Ferdig nå · −'+early;
+
  $('coverage').innerHTML=(game.coverage>=P.finish?'100':pct(game.coverage))+' <small>%</small>';
  $('timeLabel').textContent=game.mode==='timed'?'TID IGJEN':'TID';$('time').textContent=time(game.mode==='timed'?Math.ceil(game.remaining):game.time);$('time').classList.toggle('urgent',game.mode==='timed'&&game.remaining<=10);
  $('overlap').innerHTML=pct(game.overlap)+' <small>%</small>';$('hint').hidden=game.started;
@@ -160,15 +163,15 @@ function finish(){
  const flags=recordFlags(book,r);unlocked=KlippeProfile.advance(unlocked,r);saveProfile();careerMenu();
  pendingScore=KlippeProfile.qualifies(book,r)?r:null;$('initialsForm').hidden=!pendingScore;$('initials').value='';$('scoreSaved').hidden=true;scoreGate(!!pendingScore);
  $('nextLevel').hidden=!(r.completed&&game.level.stage&&game.level.stage<5);
- $('resultEyebrow').textContent=r.completed?'NYKLIPT OG NYDELIG':'DITT FORSØK · 60 SEKUNDER';
- $('resultTitle').textContent=r.completed?'FULLFØRT':'GODT KLIPPET!';$('score').textContent=scoreText(r.score);$('rank').textContent='Rang '+r.rank;
+ $('resultEyebrow').textContent=r.reason==='early-complete'?'Ferdig nå · −'+r.breakdown.earlyFinish+' poeng':r.completed?'NYKLIPT OG NYDELIG':'DITT FORSØK · 60 SEKUNDER';
+ $('resultTitle').textContent=r.reason==='early-complete'?'FULLFØRT TIDLIG':r.completed?'FULLFØRT':'GODT KLIPPET!';$('score').textContent=scoreText(r.score);$('rank').textContent='Rang '+r.rank;
  $('personalBests').replaceChildren();for(const [key,label] of [['score','NY REKORD'],['time','NY BESTE TID'],['overlap','NY LAVESTE OVERLAPP']])if(flags[key]){const span=document.createElement('span');span.textContent=label;$('personalBests').append(span);}
- $('endCoverage').textContent=r.mode==='timed'?'Du klippet '+pct(r.coverage)+' % på '+Number(r.time.toFixed(1)).toLocaleString('nb-NO')+' sekunder':(r.completed?'100':pct(r.coverage))+' % klippet';$('endTime').textContent=time(r.time);$('endOverlap').textContent=pct(r.overlap)+' %';
+ $('endCoverage').textContent=r.mode==='timed'?'Du klippet '+pct(r.coverage)+' % på '+Number(r.time.toFixed(1)).toLocaleString('nb-NO')+' sekunder':(r.reason==='early-complete'?pct(r.actualCoverage):r.completed?'100':pct(r.coverage))+' % klippet';$('endTime').textContent=time(r.time);$('endOverlap').textContent=pct(r.overlap)+' %';
  $('endCollisions').textContent=r.collisions+' (−'+r.breakdown.collisions+' p)';$('endDamage').textContent=r.damage+' (−'+r.breakdown.damage+' p)';$('endPenalty').textContent='−'+r.penalty+' p';
  $('endHeavy').textContent=pct(r.heavyTotal?r.heavyCut/r.heavyTotal:0)+' %';
  $('endFlowers').textContent=pct(r.flowerTotal?r.flowerCut/r.flowerTotal:0)+' % (−'+r.breakdown.flowers+' p)';
  for(const [id,value] of [['endCollisions',r.collisions],['endDamage',r.damage],['endPenalty',r.penalty],['endHeavy',r.heavyCut],['endFlowers',r.flowerCut]])$(id).parentElement.hidden=!value;
- $('scoreBreakdown').textContent='Dekning og tid: '+scoreText(r.breakdown.base)+' p. '+[['overlap','Overlapp'],['collisions','Kollisjoner'],['damage','Plenskade'],['wasps','Veps'],['flowers','Markblomster']].map(([key,label])=>label+': −'+r.breakdown[key]).join('. ')+'. Sum (minst 0): '+scoreText(r.score)+' p.';
+ $('scoreBreakdown').textContent='Dekning og tid: '+scoreText(r.breakdown.base)+' p. '+[['earlyFinish','Ferdig nå'],['overlap','Overlapp'],['collisions','Kollisjoner'],['damage','Plenskade'],['wasps','Veps'],['flowers','Markblomster']].map(([key,label])=>label+': −'+r.breakdown[key]).join('. ')+'. Sum (minst 0): '+scoreText(r.score)+' p.';
  clearTouch();
  const b=book[recordKey(r)];$('best').textContent=game.level.name+' · '+(game.mode==='timed'?'Tidspress':'Full plen');renderRows('resultRuns',b?.runs||[],true);
  $('notice').hidden=true;$('result').hidden=false;$('again').focus({preventScroll:true});$('result').querySelector('.card').scrollTop=0;records();if(pendingScore)$('initials').focus({preventScroll:true});sound.chime('finish');
@@ -241,6 +244,7 @@ $('soundSetting').checked=settings.sound;$('volumeSetting').value=Math.round(set
 $('soundSetting').onchange=()=>{sound.enabled=$('soundSetting').checked;if(sound.enabled)sound.start();saveSettings();};
 $('volumeSetting').oninput=()=>{settings.volume=Number($('volumeSetting').value)/100;sound.start();saveSettings();};
 $('motionSetting').onchange=()=>{settings.reduced=$('motionSetting').checked;saveSettings();};
+$('finishEarly').onclick=()=>{if(!paused&&!modalOpen()&&game.finishEarly()){clearTouch();keys.clear();hud();finish();}};
 $('retryCat').onclick=reset;$('gameOverMenu').onclick=()=>{$('gameOver').hidden=true;showMenu();};$('restart').onclick=reset;$('again').onclick=reset;$('resume').onclick=()=>{sound.start();pause(false);};$('mode').onchange=reset;
 for(const id of ['menuButton','pauseMenu','resultMenu'])$(id).onclick=showMenu;
 canvas.onclick=()=>{canvas.focus();sound.start();};
