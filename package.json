@@ -1,0 +1,13 @@
+{
+  "name": "klippekaos",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Klippekaos Prototype 03 – a static Canvas arcade game",
+  "scripts": {
+    "dev": "node scripts/serve.cjs",
+    "start": "node scripts/serve.cjs",
+    "build": "node scripts/build.cjs",
+    "test": "node scripts/test.cjs"
+  },
+  "engines": { "node": ">=20" }
+}
