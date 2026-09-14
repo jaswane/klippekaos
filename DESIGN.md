@@ -1,68 +1,63 @@
-# Prototype 03 – endringer og videre retning
+# Prototype 04 – implementert status
 
-## Hva som er implementert
+KlippeKaos – Gressklipperspillet viderefører Prototype 03 i samme statiske kodebase. Ingen backend, full karriere eller økonomi er bygget. «Karriere» er fortsatt inngangen til vanlig fullføringsmodus.
 
-Prototype 02 er videreført, med samme grunnfart, akselerasjon, bremsing, normal svingradius og kjøretøystyring. Klipperen kan fortsatt kjøre utenfor gresset, med en hard yttergrense på belegget. Coverage-grid, visuell maske, overlapp, 99,5 %-grense, restmarkering, begge boostere, pickups, Tidspress, veps, lyd, partikler og gamepad er beholdt.
+## Beholdt grunnlag
 
-1. **Startmeny:** Karriere åpner originalhagen. Tidspress bruker den valgte hagen. Testhage 2 åpner den ekstra testbanen. «Karriere» er en inngang til dagens vanlige fullføringsmodus, ikke et progresjonssystem. Veiledningen viser tastene i seks kompakte felt. Innstillinger gir lyd av/på, volum og redusert bevegelse. De to ønskede lenkene finnes diskret i startmenyen.
-2. **Eksplisitt plenskade:** Nesten stillestående klipper over plen får et varsel etter 1,8 s og en brun flekk etter 3,6 s. Klipperen må være i et påbegynt forsøk. Fart på minst 6 enheter/s eller mer enn 8 enheters bevegelse fra ankeret nullstiller oppbyggingen. Kollisjonskontakt og sikkerhetsstopp holder skade tilbake, med 1,2 s beskyttelse etterpå. Pause/meny stopper aggregatet. Samme flekk kan ikke gi gjentatt skade; en ny flekk må ligge minst 24 enheter unna. Brun flekk har radius 12. Skade endrer ikke dekningen og kan ikke stoppe fullføring.
-3. **Rettede klippestriper:** P02 hadde ikke beregnet plenskade. Retningsfargen kunne bygges opp ved overlappende tegnesteg. Nå farges hver logisk celle én gang ved førstegangsklipping. Brune skader er dermed en egen mekanikk, ikke en tilfeldig tegningsartefakt.
-4. **Boostfeedback:** Tydelig AKTIV/KLAR/TOM-status, opplyst måler og ring rundt klipperen. De to boosterne har ulik subtil kontinuerlig tone. Pickups gir kort klang og ring. Startklipperens kapasitet og fysikk er uendret; kapasiteten ligger også i en enkel klipperkonfigurasjon for senere variasjon.
-5. **Resultat og replay:** Score, rang, råverdier, alle straffer, tydelige rekordmerker og topp fem vises samlet. «Prøv igjen» og «Meny» er synlige. Rekordene holdes separat per hage/modus. «NY BESTE TID» gjelder bare faktisk fullført plen; en delvis Tidspress-runde skal ikke bli raskeste fullføring. Lik verdi utløser ikke ny rekord.
-6. **L-formet Testhage 2:** Samme overflate og mekanikk, men plenpolygonet har et stort innhakk. Bed og én pickup er flyttet inn på gresset. Det avskårne området er kjørbart belegg og teller ikke som gress. Begge hager kan spilles i de eksisterende to modusene.
-7. **Én positiv overraskelse:** En liten energireserve under gresset, på fast plass. Avsløres ved klipping og fyller inntil 0,6 s i begge målere én gang. Ved fulle målere ligger den igjen synlig til den kan brukes. Ingen penger eller inventory.
-8. **Én katt:** Varsel ved 16,5 s, kryssing fra 18 s, fart 180 enheter/s. Katten tar en liten omvei rundt en klipper nær ruten. Ved fare innen 88 enheter stopper klipperen automatisk, aggregatet beskyttes og boostenergi spares. Katten fortsetter. Ett sikkerhetsstopp kan telles per kryssing. Ingen skade på dyr, helse eller combat.
-9. **Klippefølelse:** Eksisterende lyd er videreført med litt dempet klippestøy og en visuell aggregatvibrasjon på opptil 0,4 enheter når nytt gress klippes. Bevegelsen påvirker bare tegningen, aldri kjørefysikken. Milepæler og fullføringsklang er beholdt, med en kort innblending av resultatkortet. Ingen konfetti eller skjermristing.
+Grunnstyring, akselerasjon, bremsing, normal svingradius, kjøring utenfor plenkanten, harde yttergrenser, objektkollisjoner, coverage-grid, separat visuell klippemask, overlapp og 99,5 % fullføringsgrense er beholdt. Originalhagen og L-hagen, restmarkering, plenskade, boosts, pickups, skjult energireserve, lyd, gamepad, pause og lokale rekorder er videreført.
 
-## Fysikk og boost
-
-| Verdi | Prototype 03 |
+| Grunnparameter | Verdi |
 |---|---:|
-| Toppfart frem / revers | 112 / 53 enheter/s |
-| Akselerasjon | 155 enheter/s² |
-| Brems ved retningsbytte | 290 enheter/s² |
-| Brems uten gass | 195 enheter/s² |
+| Frem / revers | 112 / 53 enheter/s |
+| Akselerasjon / retningsbrems / frirulling | 155 / 290 / 195 enheter/s² |
 | Akselavstand / maks styrevinkel | 32 / 0,62 rad |
-| Normal svingradius | ca. 44,8 enheter |
 | Klippebredde / gridcelle | 46 / 2 × 2 enheter |
-| Fartsboost | ×1,65, maks 184,8 frem / 87,45 revers |
-| Boostakselerasjon | 240 enheter/s² |
-| Manøverboost | ×1,85 krumning, radius ca. 24,2 |
-| Energi ved start / kapasitet | 2,5 / 3,0 s per boost |
-| Fast pickup / skjult reserve | inntil 1,2 s i én / 0,6 s i begge |
+| Fartsboost / manøverboost | ×1,65 fart / ×1,85 krumning |
+| Boostenergi ved start / kapasitet | 2,5 / 3,0 s per boost |
 | Fysikksteg | 1/120 s |
 
-Energien brukes bare mens knappen holdes inne under kjøring. Meny, pause, vanlig stillstand og sikkerhetsstopp bruker ikke energi. Ingen automatisk opplading. Grunnfysikken er uendret fra P02.
+Plenskade varsles etter 1,8 s nesten stillstand og oppstår etter 3,6 s. Kollisjonskontakt gir kort beskyttelse mot slik skade. Den tidligere katt-assistenten og sikkerhetsstoppen er fjernet.
 
-## Scoreformel
+## P04-innhold
 
-La C være dekningsandelen (0–1), O overlappsandelen og t brukt tid i sekunder. Ved faktisk dekning på minst 0,995 brukes C = 1 i resultatet.
+- **Branding:** «KlippeKaos – Gressklipperspillet» i title og metadata, med «Gressklipperspillet» som sekundær undertittel. Plenen.no og Swane Creative ligger i startmenyen.
+- **Tidspress:** Klipp mest mulig på 60 sekunder; delvis dekning er gyldig. Runden kan slutte tidligere ved fullført plen eller kattetreff. Resultatkortet fremhever dekning og tid, med egne rekorder per hage/modus.
+- **Kurvehagen:** Én ny organisk plen, beskrevet av et polygon med 96 punkter. Området utenfor plenen er fortsatt kjørbart.
+- **Tungt gress:** Et mørkere felt i Kurvehagen. Uklippet tungt gress foran aggregatet gir opptil 22 % lavere målfart og tyngre motorlyd. Én bevegelig passering klipper normalt; ferdigklippet område gir ikke terrengbrems. `heavyHandling` i klipperkonfigurasjonen kan brukes senere. Ingen nye klippere er laget.
+- **Blomster:** Sparsomme små ugressblomster klippes normalt uten straff. Kurvehagens markblomstfelt er kjørbart, men skal skånes. Det er utelatt fra nødvendig plenareal. Hver skadet celle telles bare én gang. Biene rundt feltet er rent dekorative.
+- **Katt:** Enkel løpeanimasjon og fire ruter: venstre–høyre, høyre–venstre, topp–bunn og diagonal. Varsel ved 16,5 s, kryssing fra 18 s, fart 180 enheter/s. Samlet kollisjonsradius er 30 enheter, og relativ bevegelse mellom fysikksteg kontrolleres. Treff gir umiddelbart tap, fryser forsøket og viser restart/meny. Ingen automatisk bremsing, unnamanøver eller rekordlagring ved tap.
+- **Jordveps:** Tilfeldige, seed-styrte plasseringer; første hendelse etter 12–18 s påbegynt spill, deretter 18–26 s cooldown etter avsluttet hendelse. Én sverm om gangen. Plasseringen må ligge på gyldig plen, 90–240 enheter fra klipperen og minst 80 fra tidligere spawnsteder. Inntil 80 kandidater prøves; ved manglende plass prøves igjen etter 3 s. Svermen varsler i 0,9 s før forfølgelse med fart 82, og varer høyst 4,5 s eller til stikk. Dette erstatter P03s faste bol og engangshendelse.
 
-- Full plen: grunnpoeng = C × [8 500 + 1 500 × clamp((T − t)/(T − 60), 0, 1)]. T er 240 s i originalhagen og 200 s i den mindre L-hagen.
-- Tidspress: grunnpoeng = C × 10 000. Klokken stopper nøyaktig på 60 s, eller tidligere ved full dekning.
-- Overlapp: trekk 1 500 × O.
-- Kollisjoner: trekk 25 per tydelig treff, maks 250.
-- Plenskade: trekk 60 per flekk, maks 300.
-- Vepsestikk: trekk 200, én gang. Redusert fra P02s 600 slik at hendelsen ikke dominerer.
-- Kattens sikkerhetsstopp: trekk 40 per stopp, maks 120; dagens ene kryssing kan gi høyst ett.
+Hendelser bruker runde-seed. Katteruten kan også velges eksplisitt med `catRoute` i `Game`-konstruktørens fjerde argument. Vanlige runder får ny seed ved restart; testsuitene bruker faste seeds. Dette er grunnlag for reproduksjon, ikke et ferdig konkurransesystem.
 
-Grunnpoeng og overlappstrekk avrundes til heltall før summering. Totalscore har nedre grense 0. Boostbruk gir ingen egen bonus eller straff. Rang: S ≥ 9 000, A ≥ 7 500, B ≥ 5 500, C ≥ 3 500, ellers D. Alle bidrag vises under «Slik ble poengene regnet» i resultatet. Råverdiene vises alltid.
+## Touch og presentasjon
 
-## Testing og gjenstående vurdering
+`dist/input.js` leverer samme throttle/steering/boost-kommandoer som tastatur og gamepad. Pointer-ID-er holdes adskilt for multitouch. Input tømmes ved pause, restart, fokus-/synlighetstap og relevant rotasjon.
 
-Automatiske tester dekker uendret kjøring, kollisjoner, boostenergi, pickups, fullføringsgrense, begge masker, skadevarsling og unntak, skjult reserve, katteavstand/sikkerhetsstopp, veps, score, rekordgrenser og gamepad-mapping. En geometrisk prøve av lovlige klipperposisjoner når 100 % av begge plenmasker. Dette er ikke det samme som å bevise at siste rest er lett for et menneske.
+Touchoppsett aktiveres ved grov peker, touchkapasitet uten hover eller faktisk berøring. En hybrid-desktop med mus/hover får derfor ikke store touchkontroller bare fordi `maxTouchPoints` er positiv. Kontrollene er skjult i HTML fra start; det finnes ingen hydration-fase.
 
-Nettleseren er brukt til startmeny, veiledning, L-hage, tastaturstart og en ekte 60-sekunders Tidspress-avslutning med plenskade, rådata og rekordmerker. Lydinnstillinger og redusert bevegelse ble også kontrollert etter omlasting. Totalt består 39 automatiske tester. Den visuelle testen fant og rettet at tegningen først var koblet til menyens forhåndsvisningscanvas i stedet for spillcanvaset.
+Touch uten hover i portrait viser «Snu enheten». Bakgrunnen blir inert og låst mot scrolling. Åpne dialoger lukkes, og en pågående runde pauser. Landscape fjerner rotasjonsvarslet; spilleren fortsetter fra pause. HUD og kontroller bruker tilgjengelig skjermplass og safe-area-insets. Resultat/dialoger kan scrolles; resultatkortet åpner øverst med overskriften synlig. Fullskjerm brukes bare der nettleseren støtter det.
 
-Lydopplevelse og fysisk gamepad er ikke verifisert med maskinvare. En full menneskelig klipperunde er ikke gjennomspilt her. Viktigste manuelle spørsmål: Er 3,6 s før skade romslig nok? Er sidehendelsene tydelige og rettferdige? Gir L-hagen interessante sporvalg? Er rangene motiverende? Er boostlydene behagelige over flere runder?
+Feedback er større og kortvarig, med uttoning. Katten har kropp-/hale-/løpebevegelse. Plenen har små fargevariasjoner og blomster; ingen ny art pipeline eller klipperdesign er innført.
 
-## Framtidig retning – dokumentert, ikke bygget
+## Score og lagring
 
-- **Karriere:** Fra liten hage via nabolag, villaer, gårder/landsteder, herskapshus og gods til slottshager. Ingen slik progresjon er implementert.
-- **Klippere som valg:** Bred klipper for flater, kompakt for hjørner, zero-turn for svinging og rask klipper med større presisjonskrav. Senere klippere skal ha avveininger, ikke bare høyere tall. Enkel konfigurasjon av boostkapasitet finnes; øvrige kjøretøyvarianter venter.
-- **Framtidige moduser:** Effektivitet, Klippekaos/stress og Zen er bare ideer. Dagens spill har fortsatt full plen og Tidspress.
-- **Touch:** Tastatur og gamepad leverer samme kommandoobjekt til fysikken. En senere virtuell joystick og touchknapper kan legges til som en ny inputadapter. Responsive elementer finnes, men touchkontroller, landscape/fullscreen-flyt, PWA og app-store-versjon er ikke implementert.
-- **Utelatt med vilje:** Økonomi, shop, coins/XP, mange nivåer/dyr/boostere, kontoer, backend, online leaderboard, achievements, streaks, inventory, ferdig spritebibliotek og eget domene. Dette ville overskride Prototype 03. GitHub-push og offentlig Vercel-publisering er heller ikke utført; prosjektpakken er klar for neste steg.
+Grunnpoeng: full plen bruker C × [8 500 + 1 500 × clamp((T − t)/(T − 60), 0, 1)], der T er 240/200/210 s for hage 1/2/3. Tidspress bruker C × 10 000. Ved minst 99,5 % dekning brukes C = 1.
 
-Ingen Prototype 04 er påbegynt. Neste beslutning bør tas etter manuell testing av denne versjonen.
+Trekk: overlapp 1 500 × andelen; objektkollisjon 25 per treff, maks 250; plenskade 60 per flekk, maks 300; veps 200 per stikk, maks 400 totalt; markblomster 180 × skadet andel, maks 180. Tungt gress gir ikke trekk. Kattetreff er tap, ikke poengstraff. Totalscore er minst 0. Grunnpoeng og beregnede andelstrekk avrundes til heltall. Rang: S ≥ 9 000, A ≥ 7 500, B ≥ 5 500, C ≥ 3 500, ellers D.
 
+Resultatkortet viser relevante råverdier og poengforklaring, med nullhendelser skjult. Topp fem og personlige rekorder lagres per hage/modus under `klippekaos-p04`; P03-nøkkelen beholdes urørt. Raskeste fullføring gjelder bare fullført plen.
+
+## QA-status
+
+- **58/58 automatiske tester**: P01–P03-regresjoner og 19 P04-tester. Tester som krevde gammel katt-assistanse eller fast vepsebol er oppdatert til de nye produktkravene. Build og `git diff --check` består.
+- **Geometri:** Kurvehagen når 58 386 / 58 480 celler = **99,83926128590971 %**, med 0 / 1 823 markblomstceller skadet. 99,5 %-kravet er uendret. Den første testen brukte feil ellipseutvidelse; faktisk korteste avstand til ellipsegrensen erstattet denne. Detaljer finnes i testen.
+- **Visuell QA:** Desktop 1440×900, laptop 1280×720, tablet 1180×820/820×1180 og mobil 390×844/844×390 med emulerte capabilities. Logo/undertittel, bane, HUD, pause, restart, katt/tap, markblomster, jordveps, score/resultat og dialoger er kontrollert. Safe areas ble simulert. Ingen observerte konsollfeil.
+- **Rettelser fra QA:** Hybrid-touchdeteksjon, resultatkortets fokus/scroll, portrait-bakgrunnslås og dialoghåndtering ved rotasjon, samt ordavstand i mobilintro.
+- **Løpende kjøreprøve:** Omtrent 50 s med tastaturhendelser gjennom faktisk inputadapter, uten forhåndssatt rundetilstand. To jordvepshendelser ved 12,7 og 39,9 s, totalt 400 poeng i trekk, katt uten assistanse og urørte markblomster. Gass/revers er også kontrollert gjennom pointer-handlerne.
+
+Fysisk iPhone/iPad, samtidig styring med to tomler, lyd/gamepad på maskinvare, opplevd reaksjonstid og menneskelig fullføring av 99,5 % rundt markblomstene gjenstår. Geometrisk tilgjengelighet er ikke en bekreftelse på menneskelig spillkomfort. QA førte ikke til ny balansering.
+
+## Senere – ikke implementert
+
+Full karriere, økonomi/shop, oppgraderinger, ulike klippere og større boostkapasitet, flere terrengtyper/vått gress/vær, flere dyr (inkludert rotter), større markblomstfelt, stress/KlippeKaos-modus, Zen, Effektivitet, online leaderboards, konto/backend, full PWA/hjemskjerminstallasjon, eget domene og ferdig art pipeline er framtidsretning. Ingen Prototype 05 startes før manuell testing.
