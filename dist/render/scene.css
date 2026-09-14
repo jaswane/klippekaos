@@ -1,0 +1,56 @@
+/* P06: one canvas fills the scene; DOM controls occupy measured safe bands. */
+body:has(#play:not([hidden])){overflow:hidden;overscroll-behavior:none}
+body #play:not([hidden]){position:relative;display:block;height:100dvh;min-height:0;max-width:none;margin:0;padding:0;overflow:hidden;isolation:isolate}
+body #play:not([hidden]) .field{position:absolute;inset:0;margin:0;min-height:0;border:0;border-radius:0;overflow:hidden;box-shadow:none;background:var(--game-background)}
+body #play #game{position:absolute;inset:0;width:100%;height:100%;max-height:none;object-fit:fill;touch-action:none;user-select:none;-webkit-user-select:none}
+body #play #sceneHud{position:absolute;top:0;left:0;right:0;z-index:2;padding:max(8px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 6px max(16px,env(safe-area-inset-left));display:grid;grid-template-columns:auto 1fr;gap:4px 20px;background:linear-gradient(#102f29ed,#17382bdd);box-shadow:0 3px 16px #17332930;color:#f0f2dd}
+body #play #sceneHud header{grid-column:1/-1;margin:0;min-height:30px;gap:16px;flex-wrap:nowrap}
+body #play #sceneHud h1{font-size:17px;min-width:0;gap:8px}
+body #play #sceneHud .version{display:none}
+body #play #sceneHud .stats{display:flex;gap:22px;width:auto;flex-shrink:0}
+body #play #sceneHud .stats>div{display:flex;gap:7px;align-items:baseline;min-width:0}
+body #play #sceneHud .stats span{font-size:9px;letter-spacing:1px;color:#bfceb2}
+body #play #sceneHud .stats strong{font-size:21px;display:block;margin:0;color:#fff9dd}
+body #play #sceneHud .stats small{font-size:12px}
+body #play #sceneHud .tools{margin:0;display:flex;flex-wrap:nowrap;gap:10px;min-width:0;font-size:12px}
+body #play #sceneHud .mode-label{flex:none;max-width:none;width:auto;margin:0}
+body #play #sceneHud .mode-label>span{display:none}
+body #play #sceneHud .mode-label select{padding:4px 6px;font-size:11px;min-height:30px;margin:0;background:#244636;color:#eef0d8;border-color:#668260}
+body #play #sceneHud .boost{min-width:100px;max-width:160px;padding:0 4px 10px}
+body #play #sceneHud .boost label{font-size:11px}
+body #play #sceneHud .boost kbd{font-size:9px;padding:0 3px;border-bottom-width:1px}
+body #play #sceneHud .boost meter{margin:0;height:8px}
+body #play #sceneHud .boost-state{font-size:7px;color:#c4d2bc}
+body #play #sceneHud #sound{font-size:11px;min-height:32px;padding:4px}
+body #play #sceneHud .round-status{min-width:0;min-height:28px;justify-content:flex-end}
+body #play #sceneHud .mode-goal{font-size:11px;line-height:1.25;margin:0;color:#d4dec7}
+body #play #sceneFooter{position:absolute;bottom:0;left:0;right:0;z-index:2;min-height:40px;margin:0;padding:2px max(12px,env(safe-area-inset-right)) max(3px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));flex-wrap:nowrap;font-size:11px;gap:8px;background:#14382be8;color:#c4d2bc}
+body #play #sceneFooter kbd{padding:1px 4px;font-size:10px}
+body #play #sceneFooter .reset{min-height:36px;font-size:12px;padding:6px 9px;color:#f3f5dd}
+body #play>.records{position:absolute;bottom:44px;right:max(14px,env(safe-area-inset-right));z-index:2;background:#173e30ed;border:1px solid #62795d;border-radius:6px;padding:2px 8px;font-size:11px;max-height:50dvh;overflow:auto}
+body #play>.records details{padding:0}body #play>.records summary span{display:none}
+body #play>.records:has(details:not([open])){opacity:.85}
+body #play .field #notice,body #play .field #notice.hazard-notice{top:var(--scene-top,96px)}
+body #play .field #hint{bottom:56px;font-size:13px;padding:8px 14px;max-width:90%;white-space:normal;text-align:center}
+body #play .field .veil{position:fixed;inset:0;z-index:6;padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));overflow:auto}
+body #play .field #result{top:var(--result-top,0px);bottom:auto;height:var(--result-height,100dvh);z-index:7}
+body #play .field .card{max-height:calc(100dvh - 28px)}
+body #play .field #result .card{max-height:calc(var(--result-height,100dvh) - 32px)}
+body #play:has(.veil:not([hidden])) #sceneHud,body #play:has(.veil:not([hidden])) #sceneFooter,body #play:has(.veil:not([hidden]))>.records{visibility:hidden}
+@media(max-width:760px){body #play #sceneHud{grid-template-columns:1fr;gap:3px}body #play #sceneHud .tools{grid-row:2;grid-column:1}body #play #sceneHud .round-status{grid-row:3;grid-column:1;justify-content:space-between}body #play #sceneHud .stats{gap:16px}body #play #sceneFooter .mouse-tip{max-width:170px}body #play #sceneFooter .alt{display:none}}
+@media(max-height:550px){body #play #sceneHud{padding-top:max(4px,env(safe-area-inset-top));padding-bottom:2px;gap:1px}body #play #sceneHud header{min-height:27px}body #play #sceneHud .stats{gap:12px}body #play #sceneHud .stats strong{font-size:18px}body #play #sceneHud .stats span{font-size:8px}body #play #sceneHud .game-icon{width:24px;height:24px}body #play #sceneHud #currentLevel{font-size:11px}body #play #sceneHud .round-status{min-height:20px}body #play #sceneHud .mode-goal{font-size:10px}body #play #sceneFooter .mouse-tip{display:none}body #play>.records{display:none}body #play .field #hint{font-size:11px;bottom:48px}body #play #sceneHud .boost{min-width:80px}}
+body.touch-device #play #sceneHud button,body.touch-device #play #sceneHud select{min-height:36px}
+body.touch-device #play #sceneHud .boost kbd{display:none}
+body.touch-device #play #sceneFooter{justify-content:center}
+body.touch-device #play #sceneFooter>div:first-child{display:none}
+body.touch-device #play #sceneFooter button{min-height:40px}
+body.touch-device #play>.records{display:none}
+@media(max-width:600px){body #play #sceneHud header{flex-wrap:wrap}body #play #sceneHud .stats{width:100%;justify-content:space-between}body #play #sceneHud .stats>div{gap:4px}body #play #sceneHud .tools{flex-wrap:wrap}}
+
+body #play #sceneHud .boost label,body #play #sceneHud .boost label span{white-space:nowrap}body #play #sceneHud .boost{min-width:145px}
+@media(max-height:550px){body #play #sceneHud .boost{min-width:115px}body #play #sceneHud .boost label{font-size:10px}}
+
+body.touch-device #play #sceneHud .keyboard-boost{display:none}
+
+body #play #sceneHud .boost label .keyboard-boost{display:inline-flex;align-items:center;margin-left:0}
+body.touch-device #play #sceneHud .boost label .keyboard-boost{display:none}

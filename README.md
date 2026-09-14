@@ -1,6 +1,6 @@
 # KlippeKaos – Gressklipperspillet
 
-**Prototype 05.1** er et gratis nettspill om å klippe plenen, laget av Swane Creative med HTML, CSS og Canvas/JavaScript.
+**Prototype 06** er et gratis nettspill om å klippe plenen, laget av Swane Creative med HTML, CSS og Canvas/JavaScript.
 
 Karriere har fem nivåer: Den lille hagen (styring og vanlig plen), L-hagen (tungt gress), Kurvehagen (katt), Blomsterhagen (markblomster) og Sommerhagen (jordveps). Fullføring låser opp neste nivå lokalt. Testhagene og Tidspress på 60 sekunder er separate valg.
 
@@ -12,7 +12,7 @@ Krever Node.js 20 eller nyere. Ingen eksterne pakkeavhengigheter.
 npm run dev
 ```
 
-Åpne http://127.0.0.1:4173. W/S eller opp/ned kjører frem og rygger; A/D eller venstre/høyre svinger. Shift gir fartsboost, E/Space gir manøverboost og Esc pauser. Standard gamepad støttes.
+Åpne http://127.0.0.1:4173. Hold venstre museknapp over spillscenen og styr mot pekeren; slipp for å stoppe med vanlig oppbremsing. Nær peker gir skarpere sving enn fjern peker. W/S eller opp/ned kjører frem og rygger; A/D eller venstre/høyre svinger. Shift gir fartsboost, E/Space gir manøverboost og Esc pauser. Standard gamepad støttes.
 
 Mobil/nettbrett spilles liggende med joystick og gass/revers. Musestyrte hybrider får touchkontroller først ved faktisk berøring. Portrait viser rotasjonsvarsel og pauser pågående spill.
 
@@ -23,7 +23,13 @@ npm test
 npm run build
 ```
 
-P05.1 har **80/80 beståtte tester**: de 72 P01–P05-testene og 8 P05.1-tester. Byggkommandoen validerer JavaScript, HTML-ID-er og lokale ressursreferanser. Se [DESIGN.md](DESIGN.md) for implementert mekanikk og QA-status.
+P06 har **97/97 beståtte tester**: de 80 P01–P05.1-testene og 17 P06-tester. Byggkommandoen validerer JavaScript, HTML-ID-er og lokale ressursreferanser. Se [DESIGN.md](DESIGN.md) for implementert mekanikk og QA-status.
+
+## P06 – visual foundation
+
+Rendering er delt i viewport, scene, plen, aktører og enkle Canvas-assets i `dist/render/`. Én world↔screen-transformasjon bevarer banens proporsjoner og brukes også av musestyringen. HUD ligger som DOM/CSS-overlay over scenen. `scene-data.js` beskriver dekor separat fra spillgeometri; statisk dekor caches, og foreground tones ned nær klipper eller aktive farer. Fysikk, scoring, nivåer og lagringsformat er uendret.
+
+Musestyringen er fysisk testet og godkjent av prosjekteier for P06-release. P06.1 er ikke implementert.
 
 ## Lagring og støtte
 
@@ -35,8 +41,8 @@ Nivåopplåsing og topp fem per bane/modus lagres i localStorage under `klippeka
 
 Importer repoets rot i Vercel. `vercel.json` angir `npm run build` og output-mappen `dist`. Ingen backend, database eller miljøvariabler kreves.
 
-- `dist/`: redigerbare statiske spillfiler, inkludert `input.js` og `profile.js`.
-- `scripts/`, `tests/`: lokal server, byggvalidering og P01–P05-tester.
+- `dist/`: redigerbare statiske spillfiler, inkludert `input.js`, `mouse-input.js`, `profile.js`, `scene-data.js` og `render/`.
+- `scripts/`, `tests/`: lokal server, byggvalidering og P01–P06-tester.
 - `app/icon.png`, `public/klippe-kaos-logo.png`, `public/vippsqr.png`: kopieres til `dist/assets/` ved build. HTML refererer eksplisitt til PNG-logo, favicon/apple-touch-icon og QR. Ingen Next.js metadata-routing brukes.
 
 Fysisk mobil/iPad, multitouch, virtuelt tastatur, QR-skanning og menneskelig fullføring rundt markblomstene bør fortsatt testes på maskinvare.
