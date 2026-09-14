@@ -49,3 +49,37 @@ main{margin-top:20px}header{margin-bottom:16px}.tools{display:flex;align-items:c
 /* P04.1: reserve the PNG logo space before it loads. */
 .menu-copy h1.brand-logo{margin:14px 0 20px;line-height:1;letter-spacing:normal}.brand-logo img{display:block;width:min(280px,100%);height:auto;aspect-ratio:1448/1086}.menu-copy h1.brand-logo span{margin-top:8px}@media(orientation:landscape) and (max-height:550px){.touch-device .menu-copy h1.brand-logo{margin:8px 0 14px}.touch-device .brand-logo img{width:160px}}
 @media(min-width:901px) and (max-height:800px){.brand-logo img{width:220px}}
+
+/* P04.2: let the desktop play surface use the space left by a compact HUD. */
+@media(min-width:901px){
+ body:not(.touch-device):has(#play:not([hidden])){background:#183f30}
+ body:not(.touch-device) #play:not([hidden]){height:100dvh;min-height:540px;max-width:none;margin:0;padding:8px 16px;display:flex;flex-direction:column;gap:4px;color:#e5eddc}
+ body:not(.touch-device) #play header{flex:none;margin:0;gap:16px;min-height:32px}
+ body:not(.touch-device) #play h1{font-size:20px;gap:8px;letter-spacing:-.5px}
+ body:not(.touch-device) #play .mark{width:28px;height:28px;border-radius:7px;font-size:22px}
+ body:not(.touch-device) #play .version{font-size:9px;color:#aec4a5;margin-bottom:3px}
+ body:not(.touch-device) #play .stats{display:flex;gap:24px}
+ body:not(.touch-device) #play .stats>div{display:flex;align-items:baseline;gap:8px;min-width:0}
+ body:not(.touch-device) #play .stats span{font-size:10px;letter-spacing:1px;color:#aec4a5}
+ body:not(.touch-device) #play .stats strong{font-size:22px;margin:0;color:#f4f5dd}
+ body:not(.touch-device) #play .stats #time.urgent{color:#ffb18c}
+ body:not(.touch-device) #play .stats small{font-size:13px;color:#aec4a5}
+ body:not(.touch-device) #play .tools{flex:none;margin:0;gap:16px;flex-wrap:nowrap}
+ body:not(.touch-device) #play .mode-label{max-width:none;flex-wrap:nowrap;gap:8px}
+ body:not(.touch-device) #play .mode-label>span{width:auto;white-space:nowrap;color:#c4d2bc}
+ body:not(.touch-device) #play .mode-label select{padding:4px 8px}
+ body:not(.touch-device) #play .boost{padding:0 4px 10px;max-width:260px;min-width:160px}
+ body:not(.touch-device) #play .boost label{font-size:12px}
+ body:not(.touch-device) #play .boost meter{margin:0;height:8px}
+ body:not(.touch-device) #play .boost-state{color:#aec4a5;font-size:8px}
+ body:not(.touch-device) #play .boost.active{color:#243f31}
+ body:not(.touch-device) #play .boost.active .boost-state{color:#385238}
+ body:not(.touch-device) #play .mode-goal{flex:none;margin:0;font-size:12px;line-height:16px;color:#c4d2bc}
+ body:not(.touch-device) #play .field{flex:1;min-height:0;border:2px solid #527054;border-radius:8px;background:#183f30;color:#243f31;box-shadow:none}
+ body:not(.touch-device) #play #game{width:100%;height:100%;max-height:none;object-fit:contain}
+ body:not(.touch-device) #play footer{flex:none;padding:0;min-height:28px;color:#c4d2bc;font-size:12px}
+ body:not(.touch-device) #play .reset{color:#e5eddc;padding:5px 8px}
+ body:not(.touch-device) #play .records{flex:none;max-height:35dvh;overflow:auto;border-color:#527054;padding:0;font-size:12px}
+ body:not(.touch-device) #play .records details{padding:2px 0}
+ body:not(.touch-device) #play .records summary,body:not(.touch-device) #play .records p,body:not(.touch-device) #play .records th{color:#c4d2bc}
+}
