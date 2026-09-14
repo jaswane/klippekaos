@@ -1,5 +1,7 @@
 (function(root){
 'use strict';
+const Mower=typeof module!=='undefined'?require('./mower.js'):root.KlippeMower;
+const Clippings=typeof module!=='undefined'?require('./particles.js'):root.KlippeClippings;
 
 function draw(ctx,game,P,{last,settings,cutLevel,rings,particles}){
  const {circle,rounded,path}=KlippeAssets,lawnPath=c=>path(c,game.level);
@@ -15,12 +17,11 @@ for(const pickup of game.pickups)if(!pickup.taken){ctx.save();ctx.translate(pick
 if(game.nest.revealed){circle(ctx,game.nest.originX,game.nest.originY,8,'#94764b');circle(ctx,game.nest.originX,game.nest.originY,4,'#423a2a');}
 if(game.nest.active){for(let i=0;i<7;i++){const a=last/140+i*2.4,x=game.nest.x+Math.cos(a)*12,y=game.nest.y+Math.sin(a*1.1)*12;circle(ctx,x-2,y-2,3,'#f8ffde99');circle(ctx,x+2,y-2,3,'#f8ffde99');circle(ctx,x,y,2.6,'#e9be40');ctx.fillStyle='#332e24';ctx.fillRect(x-1,y-2,1.5,4);}}
 if(game.flash>0){ctx.strokeStyle='#f2b365';ctx.lineWidth=2;ctx.beginPath();ctx.arc(game.x,game.y,29+(1-game.flash/.22)*8,0,Math.PI*2);ctx.stroke();}
-if(game.active.speed||game.active.turn){ctx.strokeStyle=game.active.turn?'#b692cc':'#78c7e1';ctx.lineWidth=4;ctx.beginPath();ctx.arc(game.x,game.y,28,0,Math.PI*2);ctx.stroke();}
 
- ctx.save();ctx.translate(game.x+3,game.y+4);ctx.rotate(game.angle);rounded(ctx,-21,-17,43,34,12,'#19332535');ctx.restore();ctx.save();ctx.translate(game.x+(!settings.reduced?Math.sin(last*.18)*cutLevel*.4:0),game.y);ctx.rotate(game.angle);rounded(ctx,-11,-23,20,46,9,'#bfd1a1');rounded(ctx,-9,-21,16,42,6,'#e3e9c3');for(let x of [-15,11])for(let y of [-15,15])rounded(ctx,x-5,y-4,10,8,3,'#283e34');rounded(ctx,-20,-12,39,24,7,'#e9b74f');rounded(ctx,1,-11,19,22,6,'#f5cc66');rounded(ctx,5,-8,11,16,3,'#f8d87b');rounded(ctx,16,-9,3,5,1,'#fff4b1');rounded(ctx,16,4,3,5,1,'#fff4b1');rounded(ctx,-15,-9,13,18,4,'#344c40');circle(ctx,-5,0,6,'#d08e62');circle(ctx,-7,0,5,'#f0dcb3');ctx.strokeStyle='#334b3b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(4,0,5,-1.4,1.4);ctx.stroke();ctx.restore();
+
+ Mower.draw(ctx,game,{last,settings,cutLevel});
 }
-function effects(ctx,particles){for(let p of particles){ctx.globalAlpha=Math.min(1,p.life*3);ctx.fillStyle='#c5e782';ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.life*8);ctx.fillRect(-1,-1,4,2);ctx.restore();}ctx.globalAlpha=1;
-}
+function effects(ctx,particles){Clippings.draw(ctx,particles);}
 
 root.KlippeActors={draw,effects};if(typeof module!=='undefined')module.exports=root.KlippeActors;
 })(typeof window!=='undefined'?window:globalThis);

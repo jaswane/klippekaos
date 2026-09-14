@@ -1,4 +1,4 @@
-# Prototype 06 – implementert status
+# Prototype 06.1 – implementert status
 
 P06 viderefører P05.1 i samme statiske Canvas-spill. Grunnfysikk, baneformatet 900×580, kollisjonsmodell, scoring og fullføringskravet på 99,5 % videreføres. Ingen backend, økonomi eller nye klippere.
 
@@ -65,10 +65,21 @@ Gjenstående fysisk QA: iPhone/iPad multitouch og virtuelt tastatur, safe areas/
 - `render/scene.css` legger ikon/nivå og KLIPPET/TID/POENG/OVERLAPP over scenen. Boost, pause, Ferdig nå, touch og eksisterende dialoger beholdes.
 - `mouse-input.js` bruker venstre musehold, viewportens inverse transformasjon og korteste vinkelfeil til vanlig throttle/steering. Ingen direkte posisjons-/vinkelendring. Authority faller lineært fra 1,00 ved 40 verdensenheter til 0,55 ved 280; grunnstyringen mettes ved 60°. Vinkeldødsone 0,025 rad; avstandsdemping fra 8 til 18 enheter. Release/cancel/blur avslutter museinput, med eksisterende oppbremsing.
 - Holdt mus overtar kjøre-/styreaksene; tastaturets kjøretaster avslutter museholdet. Ellers videreføres keyboard/touch/gamepad-prioriteten og kombinerbare boosts. HUD-klikk, høyreknapp og touch starter ikke musestyring.
-- Fysikk, fixed timestep, coverage, farer, scoring, nivå-ID-er og profile/localStorage-format er uendret fra P05.1. Nytt gress, striper og endelig artkit til P06.1 er ikke implementert.
+- Fysikk, fixed timestep, coverage, farer, scoring, nivå-ID-er og profile/localStorage-format er uendret fra P05.1.
 
 ### P06-validering
 
 **97/97 tester**: 80 tidligere regresjoner og 17 nye tester for transformasjoner, musestyring, inputlivssyklus, prioritet og skillet mellom rendering/dekor og modell. Build og `git diff --check` består. Nettleser-QA omfatter 1440×900, 1280×720, 1024×768, 844×390, portrait/rotasjon og pause/resultat, uten registrerte konsollfeil. En 180-sekunders automatisert museinputkjøring ga null kollisjoner; oppbremsing fra toppfart tok omtrent 0,59 sekunder etter release.
 
 Prosjekteier har deretter fysisk testet P06 med mus, vurdert styringen som veldig bra og godkjent P06 for release. De øvrige maskinvarekontrollene nevnt over er fortsatt relevante.
+
+## P06.1 – plen, klippestriper og klipper
+
+- Seedet, cached plen med naturlig variasjon i uklippet gress, tett kortgresstekstur og tydelig lengre/tettere tungt gress. Markblomster forblir lesbare. Organiske kantdetaljer påvirker bare den visuelle masken.
+- render/stripes.js lagrer første klipperetning per 6×6 verdensenheter (58 200 byte). Nye gameplay-celler får subtil kontinuerlig lysrefleksjon; overlapp mørkner ikke plenen. Bufferen brukes ikke av coverage eller scoring.
+- render/particles.js gir korte gresspartikler bare ved nytt gress: maks 80 på desktop, 32 ved touch og ingen med redusert bevegelse. Egen tilfeldig sekvens påvirker ikke spillhendelser.
+- render/mower.js tegner en kompakt gul/oransje klipper med fire hjul, motor og kontaktskygge. Lys kommer fra øvre venstre. En senere transparent sprite kan bruke samme 48×48 visuelle ramme uten å endre hitbox eller klipperadius; ingen fører er lagt til.
+- Gress-cache oppgraderes ved behov i halve oppløsningstrinn til maks faktor 2, med bevart klippemaske/retning og ingen konstant rebuild. De fire gresslagrene bruker maksimalt 5 220 000 piksler. P06s DPR- og pikselgrense for skjermcanvas er beholdt.
+- **109/109 tester** (97 eksisterende + 12 P06.1), build og diffkontroll består. Nettleser-QA dekker parallelle/motsatte/kryssende spor, U-sving, hindring, overlapp, tungt gress og blomster ved desktop/laptop/tablet/mobil-størrelser og DPR 1–2; ingen registrerte konsollfeil. Rundt 60 FPS i testnettleseren er ikke en måling av fysisk mobilmaskinvare.
+
+Prosjekteier har visuelt godkjent P06.1 mot designreferansen. Fysikk, styring, farer, scoring, blomsterregler, nivågeometri og lagring er uendret. Videre miljøgrafikk tilhører P06.2 og er ikke implementert. Fysisk mobil/iPad-kontroll av skarphet og ytelse gjenstår.

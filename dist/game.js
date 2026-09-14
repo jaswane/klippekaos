@@ -1,6 +1,7 @@
 'use strict';
 const {Game,P,recordKey,recordFlags,padInput}=Klippe,game=new Game(),canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),$=id=>document.getElementById(id),keys=new Set();
-let onMenu=true,paused=false,last=0,rings=[],particles=[],book={},storageOK=true,noticeTime=0,cutLevel=0,padPause=false,hadPad=false;
+let onMenu=true,paused=false,last=0,rings=[],book={},storageOK=true,noticeTime=0,cutLevel=0,padPause=false,hadPad=false;
+const clippings=new KlippeClippings.System();
 const mouse=new KlippeMouse.MouseInput();
 const touch=new KlippeInput.TouchInput();let touchSeen=false,device={touch:false,portrait:false};
 const settings={sound:true,volume:.55,reduced:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches||false};
@@ -29,8 +30,7 @@ const sound={
 function lawnPath(c){KlippeAssets.path(c,game.level);}
 const lawnRenderer=KlippeLawn.create(game,P),sceneRenderer=KlippeScene.create(game,P);
 let viewport=KlippeViewport.fit(900,580);
-let visualSeed=14;function random(){visualSeed=(visualSeed*1664525+1013904223)>>>0;return visualSeed/4294967296;}
-function initGrass(){sceneRenderer.reset();lawnRenderer.reset();visualSeed=14;}
+function initGrass(){sceneRenderer.reset();lawnRenderer.reset({scale:onMenu?1:fitScene().scale,dpr:onMenu?1:devicePixelRatio});}
 function notify(message,duration=1.8){$('notice').classList.toggle('hazard-notice',message==='JORDVEPS!'||message==='PASS PÅ KATTEN!');$('notice').textContent=message;$('notice').hidden=false;$('notice').style.opacity=1;noticeTime=duration;}
 function eventFeedback(event){
  if(event==='wasps')notify('JORDVEPS!',2);
@@ -52,7 +52,7 @@ function eventFeedback(event){
 function cutVisual(e){
  if(!e)return;for(const event of e.events)eventFeedback(event);lawnRenderer.cut(e);
  if(!e.moved||!e.fresh)return;cutLevel=1;
- for(let i=0;i<Math.min(4,Math.ceil(e.fresh/9));i++)if(!settings.reduced&&particles.length<400)particles.push({x:e.x+Math.sin(game.angle)*19,y:e.y-Math.cos(game.angle)*19,vx:(random()-.5)*60,vy:(random()-.5)*60,life:.25+random()*.35});
+ clippings.emit(e,game,{reduced:settings.reduced,mobile:device.touch});
 }
 function fitScene(){
  if(onMenu)return KlippeViewport.fit(900,580);
@@ -64,8 +64,8 @@ function fitScene(){
 }
 function draw(){
  if(!onMenu)$('play').style.setProperty('--scene-top',($('sceneHud').getBoundingClientRect().bottom+8)+'px');KlippeViewport.begin(canvas,ctx,viewport,onMenu?1:devicePixelRatio);
- sceneRenderer.background(ctx,viewport);lawnRenderer.draw(ctx);sceneRenderer.obstacles(ctx);
- KlippeActors.draw(ctx,game,P,{last,settings,cutLevel,rings,particles});sceneRenderer.foreground(ctx);KlippeActors.effects(ctx,particles);
+ lawnRenderer.resize(viewport.scale,onMenu?1:devicePixelRatio);sceneRenderer.background(ctx,viewport);lawnRenderer.draw(ctx);sceneRenderer.obstacles(ctx);
+ KlippeActors.draw(ctx,game,P,{last,settings,cutLevel,rings,particles:clippings.items});sceneRenderer.foreground(ctx);KlippeActors.effects(ctx,clippings.items);
 }
 
 function time(t){const seconds=Math.max(0,Math.floor(t+1e-7));return Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');}
@@ -116,7 +116,7 @@ function finish(){
 }
 function reset(){
  pendingScore=null;scoreGate(false);$('initialsForm').hidden=true;
- game.eventOptions.seed=Math.floor(Math.random()*4294967296);game.reset($('mode').value,game.garden);keys.clear();clearTouch();particles=[];rings=[];cutLevel=0;paused=false;accumulator=0;noticeTime=0;
+ game.eventOptions.seed=Math.floor(Math.random()*4294967296);game.reset($('mode').value,game.garden);keys.clear();clearTouch();clippings.clear();rings=[];cutLevel=0;paused=false;accumulator=0;noticeTime=0;
  $('gameOver').hidden=true;$('result').hidden=true;$('pause').hidden=true;$('notice').hidden=true;$('gardenName').textContent=game.level.name;$('currentLevel').textContent=game.level.stage?game.level.stage+' · '+game.level.name:game.level.name;
  $('modeGoal').textContent=game.mode==='timed'?'Hvor mye klarer du å klippe på 60 sekunder?':game.level.intro|| (game.garden==='garden3'?'Klipp plenen · la markblomstene stå · mørkt gress er tyngre':'Klipp hele plenen og finn flyten');
  $('hint').textContent=device.touch?'Hold Gass · sving med venstre tommel':'Hold venstre museknapp og styr · eller W/A/S/D' ;
@@ -127,7 +127,7 @@ function startGame(mode,garden){
  $('mode').disabled=!!Klippe.careerLevels[garden];reset();sound.start();window.scrollTo(0,0);
 }
 function showMenu(){
- careerMenu();onMenu=true;paused=false;keys.clear();clearTouch();particles=[];rings=[];cutLevel=0;accumulator=0;
+ careerMenu();onMenu=true;paused=false;keys.clear();clearTouch();clippings.clear();rings=[];cutLevel=0;accumulator=0;
  $('menu').hidden=false;$('play').hidden=true;$('result').hidden=true;$('pause').hidden=true;
  game.reset('normal',$('timedGarden').value);initGrass();sound.update();
  const b=book[recordKey(game)];$('menuRecord').textContent=b?'Din beste score her: '+scoreText(b.score):'Klar for første runde?';
@@ -181,7 +181,7 @@ document.querySelectorAll('[data-close]').forEach(button=>button.onclick=()=>$(b
 $('soundSetting').checked=settings.sound;$('volumeSetting').value=Math.round(settings.volume*100);$('motionSetting').checked=settings.reduced;
 $('soundSetting').onchange=()=>{sound.enabled=$('soundSetting').checked;if(sound.enabled)sound.start();saveSettings();};
 $('volumeSetting').oninput=()=>{settings.volume=Number($('volumeSetting').value)/100;sound.start();saveSettings();};
-$('motionSetting').onchange=()=>{settings.reduced=$('motionSetting').checked;saveSettings();};
+$('motionSetting').onchange=()=>{settings.reduced=$('motionSetting').checked;if(settings.reduced)clippings.clear();saveSettings();};
 $('finishEarly').onclick=()=>{if(!paused&&!modalOpen()&&game.finishEarly()){clearTouch();keys.clear();hud();finish();}};
 $('retryCat').onclick=reset;$('gameOverMenu').onclick=()=>{$('gameOver').hidden=true;showMenu();};$('restart').onclick=reset;$('again').onclick=reset;$('resume').onclick=()=>{sound.start();pause(false);};$('mode').onchange=reset;
 for(const id of ['menuButton','pauseMenu','resultMenu'])$(id).onclick=showMenu;
@@ -225,7 +225,7 @@ function frame(now){
  const dt=Math.min((now-last)/1000||0,.08);last=now;viewport=fitScene();const input=controls();
  if(!onMenu&&!paused&&!game.done&&!modalOpen()&&!device.portrait){
   accumulator+=dt;while(accumulator>=1/120){cutVisual(game.step(1/120,input));accumulator-=1/120;if(game.done){finish();break;}}
-  for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;}particles=particles.filter(p=>p.life>0);for(const r of rings)r.life-=dt;rings=rings.filter(r=>r.life>0);
+  clippings.update(dt,settings.reduced);for(const r of rings)r.life-=dt;rings=rings.filter(r=>r.life>0);
   cutLevel=Math.max(0,cutLevel-dt*5);if(noticeTime>0){noticeTime-=dt;$('notice').style.opacity=Math.min(1,noticeTime/.4);if(noticeTime<=0)$('notice').hidden=true;}
  }else accumulator=0;
  draw();hud();sound.update();
