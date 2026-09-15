@@ -122,7 +122,7 @@ function reset(){
 }
 function startGame(mode,garden){
  onMenu=false;$('menu').hidden=true;$('play').hidden=false;$('mode').value=mode;game.garden=garden;
- $('mode').disabled=!!Klippe.careerLevels[garden];reset();sound.start();window.scrollTo(0,0);
+ $('mode').disabled=!!Klippe.careerLevels[garden];$('modeBadge').hidden=!$('mode').disabled;$('mode').closest('.mode-label').hidden=$('mode').disabled;reset();sound.start();window.scrollTo(0,0);
 }
 function showMenu(){
  careerMenu();onMenu=true;paused=false;keys.clear();clearTouch();clippings.clear();rings=[];cutLevel=0;accumulator=0;

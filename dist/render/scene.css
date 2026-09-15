@@ -99,3 +99,28 @@ body.compact-touch #play .field .card{max-height:calc(min(100dvh,var(--play-heig
 
 /* Native image dragging/callout belongs nowhere on the gameplay canvas. */
 body #play #game{-webkit-user-drag:none;-webkit-touch-callout:none}
+
+/* P06.3: stronger desktop hierarchy; compact touch measurements stay unchanged. */
+.mode-badge{display:inline-flex;align-items:center;align-self:center;padding:5px 10px;border:1px solid #adc88855;border-radius:20px;background:#bfd98818;color:#e1edc7;font-size:11px;font-weight:700;letter-spacing:.5px}
+.mode-badge[hidden],.mode-label[hidden]{display:none!important}
+body.compact-touch #play #modeBadge{display:none}
+@media(min-width:900px) and (min-height:551px){
+ body:not(.compact-touch) #play #sceneHud{padding-top:8px;gap:3px 18px;background:linear-gradient(#0b2926f2,#143c32e6);border-bottom:1px solid #aac68a30}
+ body:not(.compact-touch) #play #sceneHud header{min-height:48px;align-items:center}
+ body:not(.compact-touch) #play #sceneHud h1{font-size:18px;letter-spacing:-.2px}
+ body:not(.compact-touch) #play #sceneHud .stats{gap:8px}
+ body:not(.compact-touch) #play #sceneHud .stats>div{display:grid;grid-template-columns:auto auto;align-items:center;gap:9px;padding:5px 12px;min-height:44px;background:#072b2580;border:1px solid #a9ca8b35;border-radius:12px;box-shadow:inset 0 1px #efffc20a}
+ body:not(.compact-touch) #play #sceneHud .stats span{font-size:10px;color:#cbdab9;letter-spacing:1px}
+ body:not(.compact-touch) #play #sceneHud .stats strong{font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums;letter-spacing:-.8px;text-shadow:0 2px 2px #061d22}
+ body:not(.compact-touch) #play #sceneHud .stats small{font-size:17px}
+ body:not(.compact-touch) #play #sceneHud .live-score strong{color:#edf3ac}
+ body:not(.compact-touch) #play #sceneHud .mode-goal{font-size:13px;line-height:1.35;color:#e0e9cc}
+ body:not(.compact-touch) #play .field #hint{font-size:15px}
+ body:not(.compact-touch) #play .result-card .complete{font-size:22px}
+ body:not(.compact-touch) #play .result-card .results p,body:not(.compact-touch) #play .result-records td{font-size:15px}
+ body:not(.compact-touch) #play .result-records h3{font-size:21px}
+ body:not(.compact-touch) #play .initials-form label{font-size:14px}
+}
+
+
+@media(min-width:900px) and (min-height:551px){body:not(.compact-touch) #play #sceneHud #currentLevel{font-size:18px}}

@@ -4,12 +4,41 @@
 const BOUNDS=Object.freeze({x:-24,y:-24,w:48,h:48});
 // Per-sprite source-pixel metadata; all coordinates below are visual only.
 const SPRITES=Object.freeze({'mower-01-push':Object.freeze({id:'mower-01-push',name:'Skyveklipper',tier:1,src:'assets/mowers/mower-01-push.png',width:1254,height:1254,anchor:Object.freeze({x:625,y:890}),scale:.105,angleOffset:-Math.PI/2,fadeSamples:Object.freeze([{x:625,y:890},{x:625,y:575},{x:625,y:260},{x:625,y:130}].map(Object.freeze))})});
+
+function walkFrame(mower,reduced=false){return reduced||mower.done||Math.abs(mower.speed||0)<3?0:1+(Math.floor((mower.travel||0)/18)%2);}
+// A blocked or paused mower returns to idle even while its physics speed is nonzero.
+const motion=new WeakMap();
+function animationFrame(mower,now,reduced=false){
+ let state=motion.get(mower);
+ if(!state||state.travel!==mower.travel){state={travel:mower.travel,movedAt:now};motion.set(mower,state);}
+ return now-state.movedAt>120?0:walkFrame(mower,reduced);
+}
+function makeWalkFrames(image,spec){
+ if(!root.document?.createElement)return null;
+ return [0,1,2].map(frame=>{
+  const tile=root.document.createElement('canvas'),ratio=.25;tile.width=Math.ceil(spec.width*ratio);tile.height=Math.ceil(spec.height*ratio);
+  const c=tile.getContext('2d');if(!c)return image;c.scale(tile.width/spec.width,tile.height/spec.height);
+  // Only the lower body changes; the handle is restored over the legs.
+  c.save();c.beginPath();c.rect(0,0,spec.width,spec.height);c.rect(548,340,174,230);c.clip('evenodd');c.drawImage(image,0,0);c.restore();
+  for(const [i,x] of [[0,584],[1,661]]){
+   const step=frame===0?0:(frame===1?1:-1)*(i===0?1:-1)*24,y=385+step;
+   c.fillStyle='#17201e44';c.beginPath();c.roundRect(x-27,y+30,57,92,24);c.fill();
+   const trouser=c.createLinearGradient(x-25,0,x+25,0);trouser.addColorStop(0,'#403a2e');trouser.addColorStop(.5,'#75674f');trouser.addColorStop(1,'#4b4437');
+   c.fillStyle=trouser;c.beginPath();c.roundRect(x-24,338,48,y+52-338,18);c.fill();
+   c.fillStyle='#242725';c.beginPath();c.roundRect(x-27,y+37,54,72,20);c.fill();
+   c.fillStyle='#514b40';c.beginPath();c.roundRect(x-23,y+37,46,64,18);c.fill();
+   c.strokeStyle='#998775';c.lineWidth=4;c.beginPath();c.moveTo(x-10,y+54);c.lineTo(x+10,y+54);c.moveTo(x-9,y+65);c.lineTo(x+9,y+65);c.stroke();
+  }
+  c.drawImage(image,548,398,174,45,548,398,174,45);return tile;
+ });
+}
+
 const ACTIVE='mower-01-push',images=new Map();
 function imageFor(id=ACTIVE){
  if(images.has(id))return images.get(id);
  const spec=SPRITES[id];if(!spec||typeof root.Image!=='function')return null;
  const entry={image:new root.Image(),ready:false};images.set(id,entry);
- entry.image.onload=()=>{entry.ready=entry.image.naturalWidth===spec.width&&entry.image.naturalHeight===spec.height;};
+ entry.image.onload=()=>{entry.ready=entry.image.naturalWidth===spec.width&&entry.image.naturalHeight===spec.height;if(entry.ready)entry.frames=makeWalkFrames(entry.image,spec);};
  entry.image.onerror=()=>{entry.ready=false;};entry.image.src=spec.src;return entry;
 }
 function spritePoint(mower,p,spec=SPRITES[ACTIVE]){const a=mower.angle+spec.angleOffset,x=(p.x-spec.anchor.x)*spec.scale,y=(p.y-spec.anchor.y)*spec.scale;return {x:mower.x+x*Math.cos(a)-y*Math.sin(a),y:mower.y+x*Math.sin(a)+y*Math.cos(a)};}
@@ -20,7 +49,7 @@ function draw(ctx,mower,{last=0,settings={reduced:false},cutLevel=0,sprite=null}
  const {rounded,circle}=KlippeAssets,a=mower.angle;
  const entry=!sprite&&imageFor();
  // The PNG already contains contact shading. Do not add the fallback shadow beneath it.
- if(entry?.ready){drawSprite(ctx,mower,entry.image,SPRITES[ACTIVE]);return;}
+ if(entry?.ready){drawSprite(ctx,mower,entry.frames?.[animationFrame(mower,last,settings.reduced)]||entry.image,SPRITES[ACTIVE]);return;}
  ctx.save();ctx.translate(mower.x+3,mower.y+4);ctx.rotate(a);rounded(ctx,-22,-21,44,42,9,'#102a2833');rounded(ctx,-19,-18,38,36,7,'#0c241e65');ctx.restore();
  ctx.save();ctx.translate(mower.x,mower.y);ctx.rotate(a);
  if(sprite){ctx.drawImage(sprite,BOUNDS.x,BOUNDS.y,BOUNDS.w,BOUNDS.h);ctx.restore();return;}
@@ -47,5 +76,5 @@ function draw(ctx,mower,{last=0,settings={reduced:false},cutLevel=0,sprite=null}
  if(mower.active?.speed||mower.active?.turn)rounded(ctx,-18,-6,1.5,12,.7,'#fff0a4');
  ctx.restore();
 }
-root.KlippeMower={BOUNDS,SPRITES,ACTIVE,spritePoint,foregroundPoints,drawSprite,draw};if(typeof module!=='undefined')module.exports=root.KlippeMower;
+root.KlippeMower={BOUNDS,SPRITES,ACTIVE,walkFrame,animationFrame,makeWalkFrames,spritePoint,foregroundPoints,drawSprite,draw};if(typeof module!=='undefined')module.exports=root.KlippeMower;
 })(typeof window!=='undefined'?window:globalThis);
