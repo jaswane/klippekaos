@@ -1,6 +1,6 @@
-# Prototype 06.1 – implementert status
+# Prototype 06.2 – implementert status
 
-P06 viderefører P05.1 i samme statiske Canvas-spill. Grunnfysikk, baneformatet 900×580, kollisjonsmodell, scoring og fullføringskravet på 99,5 % videreføres. Ingen backend, økonomi eller nye klippere.
+P06 viderefører P05.1 i samme statiske Canvas-spill. Grunnfysikk, baneformatet 900×580, kollisjonsmodell, scoring og fullføringskravet på 99,5 % videreføres. Ingen backend, økonomi eller klipperoppgraderinger.
 
 ## Karriere
 
@@ -64,7 +64,7 @@ Gjenstående fysisk QA: iPhone/iPad multitouch og virtuelt tastatur, safe areas/
 - Tegnerekkefølge: bakgrunn → cached dekor → plen/klippestatus → bakkehindringer → aktører → foreground → partikler → DOM-HUD. Foreground-transparency varierer ned til 35 % opasitet nær klipper, aktiv katt eller veps.
 - `render/scene.css` legger ikon/nivå og KLIPPET/TID/POENG/OVERLAPP over scenen. Boost, pause, Ferdig nå, touch og eksisterende dialoger beholdes.
 - `mouse-input.js` bruker venstre musehold, viewportens inverse transformasjon og korteste vinkelfeil til vanlig throttle/steering. Ingen direkte posisjons-/vinkelendring. Authority faller lineært fra 1,00 ved 40 verdensenheter til 0,55 ved 280; grunnstyringen mettes ved 60°. Vinkeldødsone 0,025 rad; avstandsdemping fra 8 til 18 enheter. Release/cancel/blur avslutter museinput, med eksisterende oppbremsing.
-- Holdt mus overtar kjøre-/styreaksene; tastaturets kjøretaster avslutter museholdet. Ellers videreføres keyboard/touch/gamepad-prioriteten og kombinerbare boosts. HUD-klikk, høyreknapp og touch starter ikke musestyring.
+- Holdt mus overtar kjøre-/styreaksene; tastaturets kjøretaster avslutter museholdet. Ellers videreføres keyboard/touch/gamepad-prioriteten og kombinerbare boosts. HUD-klikk og touch starter ikke musestyring. Høyreknappen er utvidet med revers i P06.2.
 - Fysikk, fixed timestep, coverage, farer, scoring, nivå-ID-er og profile/localStorage-format er uendret fra P05.1.
 
 ### P06-validering
@@ -82,4 +82,15 @@ Prosjekteier har deretter fysisk testet P06 med mus, vurdert styringen som veldi
 - Gress-cache oppgraderes ved behov i halve oppløsningstrinn til maks faktor 2, med bevart klippemaske/retning og ingen konstant rebuild. De fire gresslagrene bruker maksimalt 5 220 000 piksler. P06s DPR- og pikselgrense for skjermcanvas er beholdt.
 - **109/109 tester** (97 eksisterende + 12 P06.1), build og diffkontroll består. Nettleser-QA dekker parallelle/motsatte/kryssende spor, U-sving, hindring, overlapp, tungt gress og blomster ved desktop/laptop/tablet/mobil-størrelser og DPR 1–2; ingen registrerte konsollfeil. Rundt 60 FPS i testnettleseren er ikke en måling av fysisk mobilmaskinvare.
 
-Prosjekteier har visuelt godkjent P06.1 mot designreferansen. Fysikk, styring, farer, scoring, blomsterregler, nivågeometri og lagring er uendret. Videre miljøgrafikk tilhører P06.2 og er ikke implementert. Fysisk mobil/iPad-kontroll av skarphet og ytelse gjenstår.
+Prosjekteier har visuelt godkjent P06.1 mot designreferansen. Fysikk, styring, farer, scoring, blomsterregler, nivågeometri og lagring er uendret. Miljøgrafikken er videreført i P06.2 nedenfor. Fysisk mobil/iPad-kontroll av skarphet og ytelse gjenstår.
+
+## P06.2 – environment art, sprite og kontroller
+
+- Konsistent Canvas-miljøsett med tre foliage-varianter, separate stammer/kroner, busker, hekk, gjerde, mur, huskant, terrasse, møbler, parasoll, potter/bed, basseng, trampoline og heller. Karriere 1–5 har egne miljøprofiler; collider- og nivågeometri er uendret.
+- Foreground sprites caches og kan henge over klippbar plen. Opasitet faller gradvis til 35 % nær klipper, person eller aktiv katt/veps; solide stammer beholdes.
+- Tier 1-visual: public/art/mowers/mower-01-push.png (1254×1254). Aggregat-anchor (625, 890), skala 0,105, rotasjon game.angle − π/2. Person/håndtak/klipper roteres samlet; ingen personcollider eller ekstra PNG-skygge. Metadata beskriver dimensjoner og anchor; eksisterende Canvas-grafikk er fallback. Ingen shop eller nye klipperstatistikker.
+- Kompakt touch-landscape bruker 34 px HUD uten safe-area-tillegg, joystick på 92 px og knapper på minst 44 px. Kontrollene ligger over ytterområdene; visualViewport begrenser spillehøyden og dialogene. Sceneareal ved 844×390 økte omtrent 56 %, ved 844×300 omtrent 89 %, uten endret aspect ratio.
+- Venstre musehold kjører fremover; høyre rygger bakenden mot pekeren. Ønsket chassis-heading ved revers er pekerretning + π, med invertert steering for eksisterende negativ-fart-kinematikk. Siste trykte knapp overtar. Release/cancel/lost capture/blur/pause rydder musegass.
+- Aktiv scene undertrykker contextmenu, høyre auxclick, native drag og markering. Avslutningen av samme høyreklikkssekvens beskyttes i opptil 500 ms etter slipp; nytt trykk nullstiller dette. Vanlige høyreklikk i HUD/meny/dialoger beholdes.
+- **141/141 tester**, build og diffkontroll består. Nettleser-QA omfatter desktop/laptop, mobil landscape ned til 260 px effektiv høyde, safe areas, sprite/rotasjon, foreground-fade, pause/restart og event-kansellering, uten registrerte konsollfeil. Prosjekteier har fysisk godkjent høyreknapp-revers og samlet release.
+- Gjenstående maskinvare-QA: iPhone/iPad multitouch, Safari-chrome/rotasjon, lav skjermhøyde og ytelse. Personen er et statisk bilde og kan visuelt overlappe faste objekter ved tett manøvrering; dette endrer ikke kollisjon.

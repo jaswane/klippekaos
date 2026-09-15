@@ -1,6 +1,6 @@
 # KlippeKaos – Gressklipperspillet
 
-**Prototype 06.1** er et gratis nettspill om å klippe plenen, laget av Swane Creative med HTML, CSS og Canvas/JavaScript.
+**Prototype 06.2** er et gratis nettspill om å klippe plenen, laget av Swane Creative med HTML, CSS og Canvas/JavaScript.
 
 Karriere har fem nivåer: Den lille hagen (styring og vanlig plen), L-hagen (tungt gress), Kurvehagen (katt), Blomsterhagen (markblomster) og Sommerhagen (jordveps). Fullføring låser opp neste nivå lokalt. Testhagene og Tidspress på 60 sekunder er separate valg.
 
@@ -12,7 +12,7 @@ Krever Node.js 20 eller nyere. Ingen eksterne pakkeavhengigheter.
 npm run dev
 ```
 
-Åpne http://127.0.0.1:4173. Hold venstre museknapp over spillscenen og styr mot pekeren; slipp for å stoppe med vanlig oppbremsing. Nær peker gir skarpere sving enn fjern peker. W/S eller opp/ned kjører frem og rygger; A/D eller venstre/høyre svinger. Shift gir fartsboost, E/Space gir manøverboost og Esc pauser. Standard gamepad støttes.
+Åpne http://127.0.0.1:4173. Hold venstre museknapp for å kjøre fremover mot pekeren, eller høyre for å rygge bakenden mot pekeren. Slipp for vanlig oppbremsing. Nær peker gir skarpere sving enn fjern peker. W/S eller opp/ned kjører frem og rygger; A/D eller venstre/høyre svinger. Shift gir fartsboost, E/Space gir manøverboost og Esc pauser. Standard gamepad støttes.
 
 Mobil/nettbrett spilles liggende med joystick og gass/revers. Musestyrte hybrider får touchkontroller først ved faktisk berøring. Portrait viser rotasjonsvarsel og pauser pågående spill.
 
@@ -23,7 +23,7 @@ npm test
 npm run build
 ```
 
-P06.1 har **109/109 beståtte tester**: 97 eksisterende regresjoner og 12 tester for plen, striper, partikler og rendering. Byggkommandoen validerer JavaScript, HTML-ID-er og lokale ressursreferanser. Se [DESIGN.md](DESIGN.md) for implementert mekanikk og QA-status.
+P06.2 har **141/141 beståtte tester**, inkludert tidligere regresjoner og tester for miljø, mobil viewport, sprite-anchor, revers og native musehendelser. Byggkommandoen validerer JavaScript, HTML-ID-er og lokale ressursreferanser. Se [DESIGN.md](DESIGN.md) for implementert mekanikk og QA-status.
 
 ## P06 – visual foundation
 
@@ -35,7 +35,17 @@ Musestyringen er fysisk testet og godkjent av prosjekteier for P06-release.
 
 Plenrendereren cacher seedet tekstur for kort, høyt og tungt gress. Klippet plen beholder gresstrå, med subtil retningstoning fra en separat stripe-direction-buffer og organisk visuell klippekant. Overlapp legger ikke på stadig nye fargelag. Gresspartikler oppstår bare ved nytt gress og respekterer redusert bevegelse. Klipperen har tydeligere hjul, motor, lys og kontaktskygge, uten fører eller endret gameplay-footprint. Gress-cache følger viewport/DPR med faktor maks 2 og bevarer klippestatus ved resize.
 
-P06.1 er visuelt godkjent av prosjekteier mot designreferansen. Gameplay og nivåmiljøer er uendret; P06.2 er ikke startet.
+P06.1 er visuelt godkjent av prosjekteier mot designreferansen. Gameplay fra P06.1 videreføres; miljø og aktiv klipper er oppdatert i P06.2.
+
+## P06.2 – miljø og kontroller
+
+Karrierehagene har et sammenhengende miljøsett med trær/busker, terrasse, huskant, møbler, hekk/gjerde/mur, blomster, basseng og trampoline. Eksisterende trecollidere har separate, større foreground-kroner som tones ned nær klipper, person, katt og veps.
+
+Aktiv klipper er en transparent push-mower med person bak. PNG-en bruker aggregat-anchor (625, 890), skala 0,105 og vinkeloffset −π/2; Canvas-klipperen er fallback. Personen er visuell og har ingen collider.
+
+Mobil landscape har kompakt HUD, mindre touch-overlays og tilpasning til visualViewport/safe areas. Høyre museknapp rygger; siste trykte museknapp overtar, og slipp/cancel/blur/pause rydder input. Native høyreklikk og dragging undertrykkes på gameplay-flaten, med avgrenset vern for avslutningen av en påbegynt høyreklikkssekvens.
+
+Prosjekteier har fysisk testet og godkjent høyreknapp-revers og godkjent den samlede P06.2-releasen. Fysikk, coverage, scoring, progresjon og lagring er uendret.
 
 ## Lagring og støtte
 
@@ -48,7 +58,8 @@ Nivåopplåsing og topp fem per bane/modus lagres i localStorage under `klippeka
 Importer repoets rot i Vercel. `vercel.json` angir `npm run build` og output-mappen `dist`. Ingen backend, database eller miljøvariabler kreves.
 
 - `dist/`: redigerbare statiske spillfiler, inkludert `input.js`, `mouse-input.js`, `profile.js`, `scene-data.js` og `render/`.
-- `scripts/`, `tests/`: lokal server, byggvalidering og P01–P06.1-tester.
+- `scripts/`, `tests/`: lokal server, byggvalidering og P01–P06.2-tester.
+- `public/art/mowers/mower-01-push.png`: kopieres til `dist/assets/mowers/` ved build.
 - `app/icon.png`, `public/klippe-kaos-logo.png`, `public/vippsqr.png`: kopieres til `dist/assets/` ved build. HTML refererer eksplisitt til PNG-logo, favicon/apple-touch-icon og QR. Ingen Next.js metadata-routing brukes.
 
 Fysisk mobil/iPad, multitouch, virtuelt tastatur, QR-skanning og menneskelig fullføring rundt markblomstene bør fortsatt testes på maskinvare.

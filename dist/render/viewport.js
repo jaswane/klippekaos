@@ -11,6 +11,12 @@ function fit(width,height,world={x:0,y:0,w:900,h:580},insets={}){
   worldToScreen:(wx,wy)=>({x:x+wx*scale,y:y+wy*scale}),
   screenToWorld:(sx,sy)=>({x:(sx-x)/scale,y:(sy-y)/scale})};
 }
+// Layout policy only: compact touch overlays use the lawn's outer world margin.
+function compactTouch(width,height,touch){return !!touch&&width>height&&height<=550;}
+function sceneInsets({touch=false,compact=false,hudHeight=0,footerHeight=0,paddingLeft=16,paddingRight=16}={}){
+ if(touch&&compact)return {left:Math.max(8,paddingLeft),right:Math.max(8,paddingRight),top:hudHeight+4,bottom:Math.max(16,footerHeight-20)};
+ return {left:touch?126+Math.max(0,paddingLeft-16):12,right:touch?134+Math.max(0,paddingRight-16):12,top:hudHeight+6,bottom:footerHeight+6};
+}
 function pixelRatio(width,height,dpr=1){return Math.min(Math.max(1,dpr),2,Math.sqrt(4000000/Math.max(1,width*height)));}
 function begin(canvas,ctx,view,dpr=1){
  const ratio=pixelRatio(view.width,view.height,dpr),w=Math.max(1,Math.round(view.width*ratio)),h=Math.max(1,Math.round(view.height*ratio));
@@ -20,5 +26,5 @@ function begin(canvas,ctx,view,dpr=1){
  ctx.translate(view.x,view.y);ctx.scale(view.scale,view.scale);
 }
 
-root.KlippeViewport={fit,pixelRatio,begin};if(typeof module!=='undefined')module.exports=root.KlippeViewport;
+root.KlippeViewport={fit,pixelRatio,begin,compactTouch,sceneInsets};if(typeof module!=='undefined')module.exports=root.KlippeViewport;
 })(typeof window!=='undefined'?window:globalThis);

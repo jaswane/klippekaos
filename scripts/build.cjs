@@ -8,6 +8,10 @@ fs.mkdirSync(path.join(base,'dist/assets'),{recursive:true});
 for(const [source,name] of [['public/klippe-kaos-logo.png','klippe-kaos-logo.png'],['app/icon.png','icon.png'],['public/vippsqr.png','vippsqr.png']]){
  fs.copyFileSync(path.join(base,source),path.join(base,'dist/assets',name));
 }
+fs.mkdirSync(path.join(base,'dist/assets/mowers'),{recursive:true});
+for(const spec of Object.values(require('../dist/render/mower.js').SPRITES)){
+ fs.copyFileSync(path.join(base,'public/art/mowers',spec.id+'.png'),path.join(base,'dist',spec.src));
+}
 const html=fs.readFileSync(path.join(base,'dist/index.html'),'utf8');
 for(const match of html.matchAll(/(?:src|href)="([^"]+)"/g)){
  if(/^(https?:|mailto:|data:|#)/.test(match[1]))continue;

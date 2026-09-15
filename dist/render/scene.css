@@ -54,3 +54,48 @@ body.touch-device #play #sceneHud .keyboard-boost{display:none}
 
 body #play #sceneHud .boost label .keyboard-boost{display:inline-flex;align-items:center;margin-left:0}
 body.touch-device #play #sceneHud .boost label .keyboard-boost{display:none}
+
+/* P06.2 compact touch landscape: one HUD row; controls overlay outer scenery. */
+body #play{--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
+body.touch-device #play:not([hidden]){height:min(100dvh,var(--play-height,100dvh))}
+body.compact-touch #play #sceneHud{display:block;padding:max(3px,var(--safe-top)) max(8px,var(--safe-right)) 3px max(8px,var(--safe-left));box-shadow:none}
+body.compact-touch #play #sceneHud header{min-height:28px;gap:8px;flex-wrap:nowrap}
+body.compact-touch #play #sceneHud h1{gap:5px;flex:1;overflow:hidden}
+body.compact-touch #play #sceneHud .game-icon{width:20px;height:20px}
+body.compact-touch #play #sceneHud #currentLevel{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.compact-touch #play #sceneHud .stats{width:auto;gap:12px;flex-shrink:0;justify-content:flex-end}
+body.compact-touch #play #sceneHud .stats>div{min-width:0;gap:4px;flex-wrap:nowrap}
+body.compact-touch #play #sceneHud .stats span{font-size:8px;letter-spacing:.4px}
+body.compact-touch #play #sceneHud .stats strong{font-size:16px;white-space:nowrap}
+body.compact-touch #play #sceneHud .stats small{font-size:10px}
+body.compact-touch #play #sceneHud .tools{position:absolute;top:calc(100% + 6px);left:max(8px,var(--safe-left));width:104px;display:flex;flex-direction:column;gap:3px;pointer-events:none}
+body.compact-touch #play #sceneHud .tools .mode-label:has(select:disabled),body.compact-touch #play #sceneHud #sound{display:none}
+body.compact-touch #play #sceneHud .mode-label select{pointer-events:auto;width:104px;min-height:44px;font-size:10px}
+body.compact-touch #play #sceneHud .boost{width:104px;min-width:0;max-width:none;flex:none;padding:3px 5px 4px;background:#15392b99;border:0;border-radius:5px}
+body.compact-touch #play #sceneHud .boost label{font-size:9px;color:#f3f4db}
+body.compact-touch #play #sceneHud .boost meter{height:6px}
+body.compact-touch #play #sceneHud .boost-state{display:none}
+body.compact-touch #play #sceneHud .round-status{position:absolute;top:calc(100% + 4px);right:max(8px,var(--safe-right));min-height:0;margin:0}
+body.compact-touch #play #sceneHud .mode-goal{display:none}
+body.compact-touch #play #sceneHud #finishEarly{min-height:44px;font-size:11px;padding:5px 8px}
+body.compact-touch #play #sceneFooter{min-height:0;height:calc(44px + var(--safe-bottom));padding:0 max(8px,var(--safe-right)) var(--safe-bottom) max(8px,var(--safe-left));gap:0;background:transparent;justify-content:center}
+body.compact-touch #play #sceneFooter>div:last-child{display:flex;flex-wrap:nowrap;gap:3px;padding:0 4px;border-radius:10px;background:#15392bc9}
+body.compact-touch #play #sceneFooter button.reset{width:44px;height:44px;min-height:44px;padding:0;font-size:0;margin:0}
+body.compact-touch #play #sceneFooter button::before{font-size:21px;line-height:1;color:#f0f3da}
+body.compact-touch #play #pauseButton::before{content:'Ⅱ'}body.compact-touch #play #restart::before{content:'↻'}body.compact-touch #play #menuButton::before{content:'☰'}body.compact-touch #play #fullscreenButton::before{content:'⛶'}
+body.compact-touch #play .joystick{left:max(8px,var(--safe-left));bottom:calc(52px + var(--safe-bottom));width:92px;height:92px;background:#173f2b30;border-color:#d5e4b977;box-shadow:none}
+body.compact-touch #play .joystick span{width:40px;height:40px;background:#a9be8380;border-color:#e7efcba0}
+body.compact-touch #play .joystick small{color:#edf2d2;font-size:8px;text-shadow:0 1px 2px #183a28}
+body.compact-touch #play .touch-buttons{right:max(8px,var(--safe-right));bottom:calc(52px + var(--safe-bottom));grid-template-columns:44px 64px;grid-template-rows:44px 64px;gap:5px}
+body.compact-touch #play .touch-buttons button{min-width:44px;min-height:44px;padding:2px;font-size:9px;border-radius:11px}
+body.compact-touch #play .touch-buttons .throttle{font-size:16px;min-height:64px;background:#416e36d9}
+body.compact-touch #play .touch-buttons [data-touch=reverse]{font-size:11px}
+body.compact-touch #play .field #hint{bottom:calc(48px + var(--safe-bottom));font-size:10px;padding:2px 5px;background:transparent;color:#f5f5de;text-shadow:0 1px 3px #173a2b;box-shadow:none;border:0}
+@media(max-width:700px){body.compact-touch #play #sceneHud .stats{gap:7px}body.compact-touch #play #sceneHud .stats span{font-size:7px}}
+/* Safari may shrink visualViewport without changing the layout viewport. */
+body.compact-touch #play #touchControls{position:absolute}
+body.compact-touch #play .field #pause,body.compact-touch #play .field #gameOver{bottom:auto;height:min(100dvh,var(--play-height,100dvh))}
+body.compact-touch #play .field .card{max-height:calc(min(100dvh,var(--play-height,100dvh)) - 28px)}
+
+/* Native image dragging/callout belongs nowhere on the gameplay canvas. */
+body #play #game{-webkit-user-drag:none;-webkit-touch-callout:none}

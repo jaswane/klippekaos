@@ -58,9 +58,7 @@ function fitScene(){
  if(onMenu)return KlippeViewport.fit(900,580);
  const r=canvas.getBoundingClientRect(),hud=$('sceneHud').getBoundingClientRect(),foot=$('sceneFooter').getBoundingClientRect();
  const safe=getComputedStyle($('sceneHud'));
- const left=device.touch?126+Math.max(0,parseFloat(safe.paddingLeft)-16):12;
- const right=device.touch?134+Math.max(0,parseFloat(safe.paddingRight)-16):12;
- return KlippeViewport.fit(r.width,r.height,{x:0,y:0,w:P.width,h:P.height},{left,right,top:hud.bottom-r.top+6,bottom:r.bottom-foot.top+6});
+ return KlippeViewport.fit(r.width,r.height,{x:0,y:0,w:P.width,h:P.height},KlippeViewport.sceneInsets({touch:device.touch,compact:document.body.classList.contains('compact-touch'),hudHeight:hud.bottom-r.top,footerHeight:r.bottom-foot.top,paddingLeft:parseFloat(safe.paddingLeft)||0,paddingRight:parseFloat(safe.paddingRight)||0}));
 }
 function draw(){
  if(!onMenu)$('play').style.setProperty('--scene-top',($('sceneHud').getBoundingClientRect().bottom+8)+'px');KlippeViewport.begin(canvas,ctx,viewport,onMenu?1:devicePixelRatio);
@@ -119,7 +117,7 @@ function reset(){
  game.eventOptions.seed=Math.floor(Math.random()*4294967296);game.reset($('mode').value,game.garden);keys.clear();clearTouch();clippings.clear();rings=[];cutLevel=0;paused=false;accumulator=0;noticeTime=0;
  $('gameOver').hidden=true;$('result').hidden=true;$('pause').hidden=true;$('notice').hidden=true;$('gardenName').textContent=game.level.name;$('currentLevel').textContent=game.level.stage?game.level.stage+' · '+game.level.name:game.level.name;
  $('modeGoal').textContent=game.mode==='timed'?'Hvor mye klarer du å klippe på 60 sekunder?':game.level.intro|| (game.garden==='garden3'?'Klipp plenen · la markblomstene stå · mørkt gress er tyngre':'Klipp hele plenen og finn flyten');
- $('hint').textContent=device.touch?'Hold Gass · sving med venstre tommel':'Hold venstre museknapp og styr · eller W/A/S/D' ;
+ $('hint').textContent=device.touch?'Hold Gass · sving med venstre tommel':'Venstre: kjør · Høyre: rygg · flytt musen for å styre' ;
  initGrass();hud();records();canvas.focus();
 }
 function startGame(mode,garden){
@@ -197,9 +195,15 @@ function controls(){
  const t=touch.read(),m=mouse.read(game,viewport,canvas.getBoundingClientRect());return KlippeMouse.arbitrate(mouse.active,m,{throttle,steering,speedBoost:keys.has('shift'),turnBoost:keys.has('e')||keys.has(' ')},t,p);
 }
 function clearTouch(){clearMouse();touch.clear();document.querySelectorAll('[data-touch]').forEach(el=>el.classList.remove('held'));$('stickKnob').style.transform='translate(0,0)';}
+function fitPlayViewport(){
+ const height=Math.min(innerHeight,window.visualViewport?.height||innerHeight),width=Math.min(innerWidth,window.visualViewport?.width||innerWidth);
+ $('play').style.setProperty('--play-height',height+'px');
+ document.body.classList.toggle('compact-touch',!device.portrait&&KlippeViewport.compactTouch(width,height,device.touch));
+}
+window.visualViewport?.addEventListener('resize',fitPlayViewport);
 function updateDevice(){
  const previous=device;device=KlippeInput.deviceState({maxTouchPoints:navigator.maxTouchPoints,coarse:matchMedia('(pointer: coarse)').matches,hover:matchMedia('(hover: hover)').matches,width:innerWidth,height:innerHeight,touchSeen});
- document.body.classList.toggle('touch-device',device.touch);$('rotatePrompt').hidden=!device.portrait;document.body.classList.toggle('portrait-prompt',device.portrait);$('menu').inert=device.portrait;$('play').inert=device.portrait;
+ document.body.classList.toggle('touch-device',device.touch);fitPlayViewport();$('rotatePrompt').hidden=!device.portrait;document.body.classList.toggle('portrait-prompt',device.portrait);$('menu').inert=device.portrait;$('play').inert=device.portrait;
  $('fullscreenButton').hidden=!device.touch||!document.fullscreenEnabled;
  if(device.portrait&&!previous.portrait){for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();clearTouch();if(!onMenu&&!game.done)pause(true);}
 }
