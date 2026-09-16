@@ -63,7 +63,7 @@ test('Art becomes visible after asynchronous loading with a single cache rebuild
  for(let i=0;i<20;i++)s.background(r.ctx,view);assert.equal(r.canvases(),built);assert.equal(JSON.stringify(g),before);
 });
 test('Environment art stays decorative and preserves visible solid collider footprints',()=>{
- const used=new Set();for(const level of Object.values(K.careerLevels)){const before=JSON.stringify(level),d=D.forLevel(level);for(const p of d.decor)if(p.sprite){assert(A.ART[p.sprite]);used.add(p.sprite);}for(const v of d.obstacleVisuals){const o=level.obstacles[v.colliderIndex];if(o.type==='circle'){assert(v.sprite.startsWith('tree-'));assert.equal(v.layer,'foreground');}else {assert.equal(v.sprite,undefined);assert.equal(v.rotation||0,0);}}assert.equal(JSON.stringify(level),before);}assert.equal(used.size,9);
+ const used=new Set();for(const level of Object.values(K.careerLevels)){const before=JSON.stringify(level),d=D.forLevel(level);for(const p of d.decor)if(p.sprite){assert(A.ART[p.sprite]);used.add(p.sprite);}for(const v of d.obstacleVisuals){const o=level.obstacles[v.colliderIndex];if(o.type==='circle'){assert(v.sprite.startsWith('tree-'));assert.equal(v.layer,'foreground');}else {assert.equal(v.sprite,'flower-bed-stone-01');assert(v.solidBed);assert.equal(v.rotation||0,0);}}assert.equal(JSON.stringify(level),before);}assert.equal(used.size,9);
 });
 test('Seated foreshortening preserves upper body, both hands and a continuous positive leg mapping',()=>{
  for(const spec of Object.values(M.SPRITES).filter(s=>s.riderSprite)){

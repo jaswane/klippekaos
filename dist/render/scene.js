@@ -30,7 +30,7 @@ function create(game,P){
  function background(ctx,view){if(artVersion!==(KlippeAssets.revision?.()||0))reset();const a=view.screenToWorld(0,0),b=view.screenToWorld(view.width,view.height);ctx.fillStyle=data.ground;ctx.fillRect(a.x,a.y,b.x-a.x,b.y-a.y);ctx.drawImage(cache,bounds.x,bounds.y);}
  function obstacles(ctx){for(const visual of data.obstacleVisuals){const o=game.level.obstacles[visual.colliderIndex];
   if(o.type==='circle')KlippeAssets.draw(ctx,{asset:'trunk',x:o.x,y:o.y,w:o.r*2,h:o.r*2});
-  else KlippeAssets.draw(ctx,{...visual,x:o.x+o.w/2,y:o.y+o.h/2,w:o.w,h:o.h});
+  else KlippeAssets.draw(ctx,{...visual,x:o.x+o.w/2,y:o.y+o.h/2,w:o.w+12,h:o.h+12});
  }}
  function foreground(ctx){
   // No lawn clipping here: crowns can overhang mowable ground. Solid trunks were drawn earlier.

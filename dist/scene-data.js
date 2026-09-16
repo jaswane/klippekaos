@@ -18,7 +18,7 @@ function withArt(d){
 }
 function forLevel(level){
  const stage=level.stage||Number(level.id?.slice(-1))||1,p=profiles[stage]||profiles[1];
- return {ground:p.ground,decor:p.decor.map(d=>withArt({...d,anchor:[...d.anchor]})),obstacleVisuals:level.obstacles.map((o,index)=>({colliderIndex:index,asset:o.type==='circle'?'canopy':'flowerbed',variant:(stage-1)%3,canopyFactor:stage===3?2.75:2.6,layer:o.type==='circle'?'foreground':'ground',...(o.type==='circle'?{rotation:stage%2?.055:-.065,sprite:(stage-1)%2?'tree-canopy-02':'tree-round-01'}:{})}))};
+ return {ground:p.ground,decor:p.decor.map(d=>withArt({...d,anchor:[...d.anchor]})),obstacleVisuals:level.obstacles.map((o,index)=>({colliderIndex:index,asset:o.type==='circle'?'canopy':'flowerbed',variant:(stage-1)%3,canopyFactor:stage===3?2.75:2.6,layer:o.type==='circle'?'foreground':'ground',...(o.type==='circle'?{rotation:stage%2?.055:-.065,sprite:(stage-1)%2?'tree-canopy-02':'tree-round-01'}:{sprite:'flower-bed-stone-01',solidBed:true})}))};
 }
 root.KlippeSceneData={forLevel};if(typeof module!=='undefined')module.exports=root.KlippeSceneData;
 })(typeof window!=='undefined'?window:globalThis);

@@ -2,16 +2,16 @@
 const assert=require('node:assert/strict');const K=require('../dist/core.js'),S=require('../dist/profile.js');const tests=[];function test(n,f){f();tests.push(n);}function run(g,t,input={}){for(let i=0;i<Math.round(t*120);i++)g.step(1/120,input);}
 function memory(){const data=new Map();return {getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)};}
 function result(score=1000,garden='career1',mode='normal'){return {...new K.Game(mode,garden).result(),score,time:100,coverage:1,completed:true};}
-test('Five explicit career stages introduce one new terrain or danger at a time',()=>{
- const expected=[[false,false,false,false],[true,false,false,false],[false,true,false,false],[false,false,true,false],[false,false,false,true]];
+test('Five career stages introduce terrain gradually while cats remain enabled',()=>{
+ const expected=[[false,true,false,false],[true,true,false,false],[false,true,false,false],[false,true,true,false],[false,true,false,true]];
  assert.equal(Object.keys(K.careerLevels).length,5);
  Object.values(K.careerLevels).forEach((l,i)=>{assert.equal(l.stage,i+1);assert.deepEqual(['heavy','cat','wildflowers','wasps'].map(k=>l.mechanics[k]),expected[i]);assert(l.polygon.length>=4);});
 });
-test('Intro is ordinary grass: no terrain, pickups, hidden finds, idle damage or dynamic hazards',()=>{
- const g=new K.Game('normal','career1');g.started=true;run(g,80);assert.equal(g.heavyTotal,0);assert.equal(g.flowerTotal,0);assert.equal(g.pickups.length,0);assert.equal(g.damage.length,0);assert(!g.cat.warned&&!g.cat.active);assert.equal(g.waspSpawns.length,0);g.x=g.find.x;g.y=g.find.y;run(g,.1,{forward:true});assert(!g.find.revealed);
+test('Intro is ordinary grass with a late cat, but no terrain, pickups, finds, damage or wasps',()=>{
+ const g=new K.Game('normal','career1');g.started=true;run(g,80);assert.equal(g.heavyTotal,0);assert.equal(g.flowerTotal,0);assert.equal(g.pickups.length,0);assert.equal(g.damage.length,0);assert(g.catPasses>0);assert.equal(g.waspSpawns.length,0);g.x=g.find.x;g.y=g.find.y;run(g,.1,{forward:true});assert(!g.find.revealed);
 });
 test('Career mechanics gate recurring cats and hidden nests to their introductory stages',()=>{
- for(let i=2;i<=5;i++){const g=new K.Game('normal','career'+i);assert.equal(g.heavyTotal>0,i===2);assert.equal(g.flowerTotal>0,i===4);assert.equal(g.waspNests.length>0,i===5);g.started=true;g.x=100;g.y=500;run(g,90);assert.equal(g.catPasses>0,i===3);assert.equal(g.waspSpawns.length,0);}
+ for(let i=2;i<=5;i++){const g=new K.Game('normal','career'+i);assert.equal(g.heavyTotal>0,i===2);assert.equal(g.flowerTotal>0,i===4);assert.equal(g.waspNests.length>0,i===5);g.started=true;g.x=100;g.y=500;run(g,90);assert(g.catPasses>0);assert.equal(g.waspSpawns.length,0);}
 });
 
 test('Every career lawn remains reachable with its own geometry',()=>{

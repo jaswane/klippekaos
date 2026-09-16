@@ -1,6 +1,6 @@
-# P06.3 + mower progression foundation – implementert status
+# P06.3 + Karriere-klipperprogresjon – implementert status
 
-P06 viderefører P05.1 i samme statiske Canvas-spill. Grunnfysikk, baneformatet 900×580, kollisjonsmodell, scoring og fullføringskravet på 99,5 % videreføres. Ingen backend eller økonomi. Lokale klipperprofiler er tilgjengelige via Art QA; vanlig spill starter med standardklipperen.
+P06 viderefører P05.1 i samme statiske Canvas-spill. Grunnfysikk, baneformatet 900×580, kollisjonsmodell, scoring og fullføringskravet på 99,5 % videreføres. Ingen backend eller økonomi. Seks klipperprofiler låses opp gjennom Karriere og velges i hovedmenyen; en ny profil starter med standardklipperen.
 
 ## Karriere
 
@@ -10,11 +10,11 @@ Hvert nivå har eksplisitte mekanikkflagg. De tre testhagene er separate fra kar
 |---|---|---|
 | 1 – Den lille hagen | Vanlig plen og faste hindringer | Rektangel, terrasse, potter og hekk |
 | 2 – L-hagen | Tungt gress | L-form med hekk, terrasse og parasoll i innhakket |
-| 3 – Kurvehagen | Katt | Organisk plen, busker, terrasse og parasoll |
+| 3 – Kurvehagen | Hyppigere katt | Organisk plen, busker, terrasse og parasoll |
 | 4 – Blomsterhagen | Markblomster som skal skånes | Egen åpen åttekant, to blomsterøyer og kantdekor |
 | 5 – Sommerhagen | Skjulte jordvepsbol | Egen større, åpen sekskant, basseng, terrasse og parasoll |
 
-Nivå 1 har ingen katt, veps, markblomster eller tungt gress. Nivå 2–5 aktiverer bare den nye terreng-/faretypen i tabellen; de kombinerer ikke alle tidligere utfordringer. Pickups, skjult energifunn og plenskade ved stillstand er deaktivert i karrieren. Boost er fortsatt tilgjengelig. Miljødekor utenfor plenen påvirker ikke kollisjon, coverage eller scoring.
+Katt er aktiv på alle Karriere-nivåer. Nivå 1 har ellers ingen veps, markblomster eller tungt gress. Tungt gress finnes på nivå 2, markblomster på nivå 4 og skjulte vepsbol bare på nivå 5; nivåene kombinerer ikke alle tidligere terrengutfordringer. Pickups, skjult energifunn og plenskade ved stillstand er deaktivert i karrieren. Boost er fortsatt tilgjengelig. Miljødekor utenfor plenen påvirker ikke kollisjon, coverage eller scoring.
 
 Fullført, opplåst karrierenivå i normalmodus åpner neste nivå, maksimalt nivå 5. Tap og Tidspress låser ikke opp nivåer. Valgt nivå og låste valg vises i menyen; resultatkortet tilbyr neste nivå etter fullføring.
 
@@ -22,7 +22,7 @@ Fullført, opplåst karrierenivå i normalmodus åpner neste nivå, maksimalt ni
 
 - Tungt, uklippet gress gir opptil **25 % lavere fart**. Belastningen måles foran aggregatet; styreresponsen er beholdt. Ferdigklippet gress bremser ikke.
 - Markblomster er kjørbare, men skal skånes. De inngår ikke i nødvendig plenareal; skade telles én gang per celle og gir opptil 180 poeng i trekk. Små bier er dekor.
-- Kattetreff gir umiddelbart game over, uten automatisk bremsing eller unnamanøver. Første ankomst er ved 18 sekunder; etter passeringen følger 13,5 sekunders pause før neste 1,5-sekunders varsel. Variant, fart og rute beholdes gjennom runden. Kontrollen av relativ bevegelse mellom fysikksteg er beholdt.
+- Kattetreff gir umiddelbart game over, uten automatisk bremsing eller unnamanøver. Karriere-nivå 1–5 har første ankomst ved 30/25/18/18/18 sekunder, cooldown etter passering på 28/22/17/16/13,5 sekunder før neste 1,5-sekunders varsel og maks 2/2/3/3/4 passeringer. Testhagene beholder første ankomst ved 18 sekunder og cooldown 13,5 sekunder. Variant, fart og rute beholdes gjennom runden. Kontrollen av relativ bevegelse mellom fysikksteg er beholdt.
 - Katt og jordveps deler en enkel faresperre: én dynamisk fare om gangen, inkludert kattens varsling. Etter avsluttet fare er det minst tre sekunders mellomrom. En utsatt katt beholder 1,5 sekunders forvarsel.
 - Jordveps kommer fra 2–4 skjulte, seedede bol per relevant runde/nivå. Aggregatets passering gjennom uklippet gress utløser bolet én gang; tid alene utløser ingen hendelse. Bol venter i kø ved katt eller aktiv sverm. Maks fire hendelser, 0,9 sekunders varsel, seks sekunders pause mellom svermer og 200 poeng per stikk / 400 samlet. Plassering holder minst 56 verdensenheter fra kanter/hindringer, 110 fra start og 130 mellom bol, og unngår blomster.
 
@@ -106,12 +106,20 @@ Prosjekteier har visuelt godkjent P06.1 mot designreferansen. Fysikk, styring, f
 | Hagetraktor | 1,24 | 1,26 | 0,96 |
 | Zero-turn | 1,30 | 1,32 | 1,08 |
 
-Klippe-radius er 23 × breddefaktor, uavhengig av kollisjonsradius 14. Fartsmultiplikatoren gjelder frem og revers; akselerasjon, input, scoring, 99,5 %-krav, Ferdig nå, progresjon og lagringsformat videreføres. Art QA bytter profil og utseende samlet uten å nullstille runden.
+Klippe-radius er 23 × breddefaktor, uavhengig av kollisjonsradius 14. Fartsmultiplikatoren gjelder frem og revers; akselerasjon, input, scoring, 99,5 %-krav og Ferdig nå videreføres. Art QA bytter profil og utseende samlet uten å nullstille runden.
 
 Sitteklippernes world-scale er økt 10/14/16 %. Separate rider-overlays har kildepikselbaserte anchors, grep, diskret bevegelse og visuell forkorting av underkroppen. Godkjent mapping følger motivet: `mower-05-zero-turn-yellow.png` brukes av hagetraktor med `rider-04-ride-tractor.png`; `mower-04-ride-tractor-yellow.png` brukes av zero-turn med `rider-05-zero-turn.png`. Filnavn og PNG-er er urørt. Tre skyveklippere bruker den eksisterende gåsyklusen; Canvas-klipper er fallback.
 
-Ni lokale environment-assets dekker trær, busker, hekk, potte, stol, parasoll og steinbed. Metadata bestemmer utsnitt, størrelse og variasjon; cache oppdateres når bilder lastes. Foreground-fade omfatter også rider. Banegeometri og solide hindringer er uendret.
+Ni lokale environment-assets dekker trær, busker, hekk, potte, stol, parasoll og steinbed. Metadata bestemmer utsnitt, størrelse og variasjon; cache oppdateres når bilder lastes. Foreground-fade omfatter også rider. Banegeometri og solide hindringer er uendret. Eksisterende rektangulære blomsterbed bruker nå `flower-bed-stone-01.png`, sentrert over collideren med bevart bildeformat og gress under transparente hjørner. Collideren er uendret; outline finnes bare i Art QA.
 
-Art QA (`npm run art:qa`, port 4191) viser profil, seed, bol/hendelser og valgfrie bolmarkører, samt kjøre-, canopy- og rider-testscener. Det injiseres bare av lokal QA-server, ikke produksjonsbygget.
+Art QA (`npm run art:qa`, port 4191) viser profil, seed, bol/hendelser og valgfrie bolmarkører, samt kjøre-, canopy- og rider-testscener. Karriere-unlocks, valgt klipper, simulert fullføring og reset bruker isolert sessionStorage uten å berøre vanlig profil. Det injiseres bare av lokal QA-server, ikke produksjonsbygget.
 
-**180/180 tester**, build og diffkontroll består. Nettleser-QA ved 1440×900, 1280×720 og 844×390 viste ingen sidescroll eller konsollfeil; rider-plassering, varsler, bolutløsning og mobilpause er kontrollert. Bredeste aggregat når 99,81279150460759 % i geometrisk blomstersikker test uten skade. Prosjekteier har fysisk godkjent klipperprofiler, større sitteklippere, gjentakende katt, skjulte bol og Art QA. Fysisk Safari/iPad-ytelse og multitouch er fortsatt relevante maskinvarekontroller.
+**196/196 tester**, build og diffkontroll består. De 16 nye testene dekker milepæler, valg/lagring, migrering, engangsopplåsing, kattetiming/maks passeringer, farekoordinering og blomsterbed/collider. Nettleser-QA ved 1440×900, 1280×720 og 844×390 viste ingen sidescroll eller konsollfeil; rider-plassering, varsler, bolutløsning og mobilpause er kontrollert. Bredeste aggregat når 99,81279150460759 % i geometrisk blomstersikker test uten skade. Prosjekteier har fysisk godkjent klipperprofiler, større sitteklippere, gjentakende katt, skjulte bol og Art QA, deretter Karriere-progresjon, klipperopplåsing, nivåspesifikk kattfrekvens og nytt blomsterbed. Fysisk Safari/iPad-ytelse og multitouch er fortsatt relevante maskinvarekontroller.
+
+## Karriere-klippervalg og lagring
+
+Standardklipper er åpen fra start. `unlockAfterCareerLevel` låser opp gul skyveklipper etter nivå 1, premium etter 2, kompakt sitteklipper etter 3, hagetraktor etter 4 og zero-turn etter 5. Menyen viser seks kort med bilde, relative stats, valgt status og låsekrav. Alle opplåste maskiner kan velges fritt; eksisterende profilverdier over er uendret.
+
+Resultatkortet viser «Ny klipper låst opp!» med «Bruk denne» / «Fortsett med nåværende» bare første gang. Valget gjelder Karriere; testhager og Tidspress starter med standardklipper. Unlock lagres før initialregistrering, så reload/replay ikke gjentar belønningen.
+
+`selectedMower` og `unlockedMowers` legges til under eksisterende `klippekaos-p05`. Manglende valg gir standardklipper; opplåsinger utledes fra eksisterende progresjon og lagrede fullføringer. Tilgang til nivå 5 beviser bare fullført nivå 4; zero-turn krever dokumentert nivå 5-fullføring. Highscores, opprinnelige datoer og historiske rekorder bevares.

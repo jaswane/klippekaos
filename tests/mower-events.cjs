@@ -61,7 +61,7 @@ test('All six deck widths use the same physical hidden-nest crossing rule',()=>{
  for(const p of Object.values(K.mowerProfiles)){const g=new K.Game('normal','career5',undefined,{seed:42});g.setMowerProfile(p.id);const n=g.waspNests[0];assert(cross(g,n).includes('wasps'));assert.equal(g.waspSpawns.length,1);}
 });
 test('A nest cannot be reused, no fifth event is possible, and penalty remains capped at 400',()=>{
- const g=new K.Game('normal','career5',undefined,{seed:42});assert.equal(g.waspNests.length,4);for(const n of g.waspNests){cross(g,n);g.speed=0;g.x=n.x;g.y=n.y;run(g,8);}assert.equal(g.waspSpawns.length,4);assert.equal(g.waspStings,4);assert.equal(g.penalty,400);
+ const g=new K.Game('normal','career5',undefined,{seed:42});g.mechanics.cat=false;assert.equal(g.waspNests.length,4);for(const n of g.waspNests){cross(g,n);g.speed=0;g.x=n.x;g.y=n.y;run(g,8);}assert.equal(g.waspSpawns.length,4);assert.equal(g.waspStings,4);assert.equal(g.penalty,400);
  for(const n of g.waspNests){cross(g,n);run(g,.1);}run(g,15);assert.equal(g.waspSpawns.length,4);g.waspNests.push({id:4,x:450,y:250,state:'queued'});assert(!g.spawnWasps([]));
  g.reset();assert.equal(g.waspSpawns.length,0);assert.equal(g.waspStings,0);assert.equal(g.penalty,0);assert.equal(g.waspNests.length,4);assert(g.waspNests.every(n=>n.state==='hidden'));
 });
@@ -74,7 +74,7 @@ test('A crossed nest waits for the warned cat and the three-second gap without l
  assert.equal(g.waspSpawns.length,1);assert.equal(g.waspSpawns[0].id,n.id);
 });
 test('Cats repeat with the unchanged first arrival and warning, 13.5 second rests, and one stable variant',()=>{
- const g=new K.Game('normal','career3',undefined,{catRoute:'left-right'});g.started=true;g.x=100;g.y=500;const variant=g.cat.variant,warnings=[],exits=[];
+ const g=new K.Game('normal','garden1',undefined,{catRoute:'left-right'});g.started=true;g.x=100;g.y=500;g.mechanics.wasps=false;const variant=g.cat.variant,warnings=[],exits=[];
  for(let i=0;i<70*120;i++){const e=g.step(1/120);if(e.events.includes('cat-warning'))warnings.push(g.time);if(e.events.includes('cat-gone'))exits.push(g.time);assert.equal(g.cat.variant,variant);}
  assert(warnings.length>=3&&exits.length>=3);near(warnings[0],16.5,1/120+.00001);for(let i=1;i<warnings.length;i++)near(warnings[i]-exits[i-1],13.5,1/120+.00001);assert(!g.done);
 });

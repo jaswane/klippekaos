@@ -6,10 +6,17 @@ const mouse=new KlippeMouse.MouseInput();
 const touch=new KlippeInput.TouchInput();let touchSeen=false,device={touch:false,portrait:false};
 const settings={sound:true,volume:.55,reduced:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches||false};
 try{const v=JSON.parse(localStorage.getItem('klippekaos-settings')||'{}');if(typeof v.sound==='boolean')settings.sound=v.sound;if(Number.isFinite(v.volume))settings.volume=Math.max(0,Math.min(1,v.volume));if(typeof v.reduced==='boolean')settings.reduced=v.reduced;}catch{storageOK=false;}
-let unlocked=1,pendingScore=null;
-try{const profile=KlippeProfile.load(localStorage);book=profile.book;unlocked=profile.unlocked;storageOK=storageOK&&profile.ok;}catch{storageOK=false;}
-function saveProfile(){try{storageOK=KlippeProfile.save(localStorage,book,unlocked);}catch{storageOK=false;}}
+let unlocked=1,pendingScore=null,mowerProgress=KlippeProfile.mowerState(),pendingMower=null;
+let profileStorage;try{profileStorage=window.KlippeQAStorage||localStorage;}catch{}
+try{const profile=KlippeProfile.load(profileStorage);book=profile.book;unlocked=profile.unlocked;mowerProgress={selectedMower:profile.selectedMower,unlockedMowers:profile.unlockedMowers};storageOK=storageOK&&profile.ok;}catch{storageOK=false;}
+function saveProfile(){try{storageOK=KlippeProfile.save(profileStorage,book,unlocked,mowerProgress);}catch{storageOK=false;}}
+function chooseMower(id){if(!KlippeProfile.selectMower(mowerProgress,id))return false;saveProfile();$('selectedMowerName').textContent=KlippeMower.SPRITES[id].name;return true;}
+function mowerMenu(){KlippeMowerMenu.choices($('mowerChoices'),mowerProgress,id=>{if(chooseMower(id)){mowerMenu();$('mowerSelectionStatus').textContent=KlippeMower.SPRITES[id].name+' er valgt for Karriere.';$('mowerChoices').querySelector('[aria-pressed="true"]').focus({preventScroll:true});}});}
+function presentMowerUnlock(ids){pendingMower=ids[0]||null;$('mowerUnlock').hidden=!pendingMower;if(!pendingMower)return;
+ const spec=KlippeMower.SPRITES[pendingMower];$('unlockedMowerName').textContent=spec.name;$('unlockChoice').textContent='Velg klipper for neste runde.';$('unlockActions').hidden=false;$('unlockedMowerImage').setAttribute('aria-label',spec.name);KlippeMowerMenu.preview($('unlockedMowerImage'),pendingMower);
+}
 function careerMenu(){
+ $('selectedMowerName').textContent=KlippeMower.SPRITES[mowerProgress.selectedMower].name;
  const selected=$('careerLevel').value||'career1';$('careerLevel').replaceChildren();
  for(const level of Object.values(Klippe.careerLevels)){const option=document.createElement('option');option.value=level.id;option.textContent=level.stage+' · '+level.name+(level.stage>unlocked?' · låst':'');option.disabled=level.stage>unlocked;$('careerLevel').append(option);}
  $('careerLevel').value=selected;$('careerLabel').textContent=Klippe.careerLevels[selected].stage+' · '+Klippe.careerLevels[selected].name+' →';
@@ -96,7 +103,7 @@ function records(){
 function finish(){
  const r=game.result();
  if(r.failed){clearTouch();keys.clear();$('notice').hidden=true;$('gameOver').hidden=false;$('retryCat').focus();sound.chime('collision');return;}
- const flags=recordFlags(book,r);unlocked=KlippeProfile.advance(unlocked,r);saveProfile();careerMenu();
+ const flags=recordFlags(book,r),progress={...mowerProgress,unlocked},newMowers=KlippeProfile.completeCareer(progress,r);unlocked=progress.unlocked;mowerProgress={selectedMower:progress.selectedMower,unlockedMowers:progress.unlockedMowers};saveProfile();careerMenu();presentMowerUnlock(newMowers);
  pendingScore=KlippeProfile.qualifies(book,r)?r:null;$('initialsForm').hidden=!pendingScore;$('initials').value='';$('scoreSaved').hidden=true;scoreGate(!!pendingScore);
  $('nextLevel').hidden=!(r.completed&&game.level.stage&&game.level.stage<5);
  $('resultEyebrow').textContent=r.reason==='early-complete'?'Ferdig nå · −'+r.breakdown.earlyFinish+' poeng':r.completed?'NYKLIPT OG NYDELIG':'DITT FORSØK · 60 SEKUNDER';
@@ -110,9 +117,11 @@ function finish(){
  $('scoreBreakdown').textContent='Dekning og tid: '+scoreText(r.breakdown.base)+' p. '+[['earlyFinish','Ferdig nå'],['overlap','Overlapp'],['collisions','Kollisjoner'],['damage','Plenskade'],['wasps','Veps'],['flowers','Markblomster']].map(([key,label])=>label+': −'+r.breakdown[key]).join('. ')+'. Sum (minst 0): '+scoreText(r.score)+' p.';
  clearTouch();
  const b=book[recordKey(r)];$('best').textContent=game.level.name+' · '+(game.mode==='timed'?'Tidspress':'Full plen');renderRows('resultRuns',b?.runs||[],true);
- $('notice').hidden=true;$('result').hidden=false;$('again').focus({preventScroll:true});$('result').querySelector('.card').scrollTop=0;records();if(pendingScore)$('initials').focus({preventScroll:true});sound.chime('finish');
+ $('notice').hidden=true;$('result').hidden=false;$('again').focus({preventScroll:true});$('result').querySelector('.card').scrollTop=0;records();if(pendingMower)$('useUnlockedMower').focus({preventScroll:true});else if(pendingScore)$('initials').focus({preventScroll:true});sound.chime('finish');
 }
 function reset(){
+ presentMowerUnlock([]);
+ const mowerID=Klippe.careerLevels[game.garden]&&mowerProgress.unlockedMowers.includes(mowerProgress.selectedMower)?mowerProgress.selectedMower:KlippeProfile.defaultMower;game.setMowerProfile(mowerID);KlippeMower.setAppearance(game,mowerID);
  pendingScore=null;scoreGate(false);$('initialsForm').hidden=true;
  game.eventOptions.seed=Math.floor(Math.random()*4294967296);game.reset($('mode').value,game.garden);keys.clear();clearTouch();clippings.clear();rings=[];cutLevel=0;paused=false;accumulator=0;noticeTime=0;
  $('gameOver').hidden=true;$('result').hidden=true;$('pause').hidden=true;$('notice').hidden=true;$('gardenName').textContent=game.level.name;$('currentLevel').textContent=game.level.stage?game.level.stage+' · '+game.level.name:game.level.name;
@@ -148,6 +157,9 @@ document.addEventListener('keydown',e=>{
 document.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
 window.addEventListener('blur',()=>{keys.clear();if(game.started&&!game.done&&!onMenu)pause(true);});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&game.started&&!onMenu)pause(true);});
+$('mowerButton').onclick=()=>{mowerMenu();$('mowerSelectionStatus').textContent='';$('mowerDialog').showModal();};
+function resolveMowerUnlock(use){if(!pendingMower)return;if(use)chooseMower(pendingMower);$('unlockChoice').textContent='Neste runde: '+KlippeMower.SPRITES[mowerProgress.selectedMower].name;$('unlockActions').hidden=true;pendingMower=null;if(pendingScore)$('initials').focus({preventScroll:true});else $('nextLevel').hidden?$('again').focus():$('nextLevel').focus();}
+$('useUnlockedMower').onclick=()=>resolveMowerUnlock(true);$('keepMower').onclick=()=>resolveMowerUnlock(false);
 $('careerLevel').onchange=careerMenu;
 $('career').onclick=()=>{const level=Klippe.careerLevels[$('careerLevel').value];if(level&&level.stage<=unlocked)startGame('normal',level.id);};
 $('nextLevel').onclick=()=>{if(game.level.stage<unlocked)startGame('normal','career'+(game.level.stage+1));};
@@ -232,7 +244,7 @@ function frame(now){
   clippings.update(dt,settings.reduced);for(const r of rings)r.life-=dt;rings=rings.filter(r=>r.life>0);
   cutLevel=Math.max(0,cutLevel-dt*5);if(noticeTime>0){noticeTime-=dt;$('notice').style.opacity=Math.min(1,noticeTime/.4);if(noticeTime<=0)$('notice').hidden=true;}
  }else accumulator=0;
- draw();hud();sound.update();
+ draw();hud();sound.update();KlippeMowerMenu.paint();
  if(onMenu){const c=$('menuPreview').getContext('2d');c.clearRect(0,0,900,580);c.drawImage(canvas,0,0);}
  requestAnimationFrame(frame);
 }

@@ -30,13 +30,14 @@ function drawArt(c,d){
   c.save();if(vertical)c.rotate(Math.PI/2);const count=Math.max(1,Math.ceil(length/(thickness*sw/sh))),segment=length/count;
   c.beginPath();c.rect(-length/2,-thickness/2,length,thickness);c.clip();
   for(let i=0;i<count;i++)blit(-length/2+segment*(i+.5),0,thickness*sw/sh,thickness);c.restore();
- }else{const scale=Math.min(d.w/sw,d.h/sh);blit(0,0,sw*scale,sh*scale);}
+ }else{const scale=(d.solidBed?Math.max:Math.min)(d.w/sw,d.h/sh);blit(0,0,sw*scale,sh*scale);}
  return true;
 }
 function draw(c,d){
  c.save();c.translate(d.x,d.y);c.rotate(d.rotation||0);c.scale((d.mirrorX?-1:1)*(d.scale||1),d.scale||1);
  const w=d.w,h=d.h,[ax,ay]=d.anchor||[.5,.5];c.translate((.5-ax)*w,(.5-ay)*h);
  if(drawArt(c,d)){c.restore();return;}
+ if(d.solidBed){c.fillStyle="#897d64";c.beginPath();c.ellipse(0,0,d.w/2,d.h/2,0,0,Math.PI*2);c.fill();c.fillStyle="#51452f";c.beginPath();c.ellipse(0,0,d.w/2-5,d.h/2-5,0,0,Math.PI*2);c.fill();c.restore();return;}
  let seed=97+(d.variant||0)*417;const rnd=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
  const line=(x,y,X,Y,color,width=1)=>{c.strokeStyle=color;c.lineWidth=width;c.beginPath();c.moveTo(x,y);c.lineTo(X,Y);c.stroke();};
  const box=(color,inset=0,r=3)=>rounded(c,-w/2+inset,-h/2+inset,w-2*inset,h-2*inset,r,color);

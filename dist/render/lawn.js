@@ -48,7 +48,8 @@ function create(game,P){
   builds++;seed=14;
   for(const [canvas,c] of [[lawn,g],[grass,tall]]){canvas.width=Math.round(P.width*ratio);canvas.height=Math.round(P.height*ratio);c.setTransform(ratio,0,0,ratio,0,0);}
   paintShort();paintTall();
-  for(const o of game.level.obstacles)for(const c of [g,tall]){c.save();c.globalCompositeOperation='destination-out';if(o.type==='circle')circle(c,o.x,o.y,o.r+P.trim,'#000');else rounded(c,o.x-P.trim,o.y-P.trim,o.w+2*P.trim,o.h+2*P.trim,P.trim,'#000');c.restore();}
+  // The stone PNG supplies its own organic edge; retain grass beneath its transparent corners.
+  for(const o of game.level.obstacles)for(const c of [g,tall]){c.save();c.globalCompositeOperation='destination-out';if(o.type==='circle')circle(c,o.x,o.y,o.r+P.trim,'#000');c.restore();}
   tall.save();tall.globalCompositeOperation='destination-out';tall.drawImage(cutMask,0,0,P.width,P.height);tall.restore();
  }
  function reset({scale=1,dpr=1}={}){ratio=quality(scale,dpr);stripes.reset();stripeInk.clearRect(0,0,P.width,P.height);maskInk.clearRect(0,0,P.width,P.height);rebuild();}
@@ -74,7 +75,7 @@ function create(game,P){
   for(const side of [-1,1]){const x=e.x-Math.sin(game.angle)*(radius+1)*side,y=e.y+Math.cos(game.angle)*(radius+1)*side;if((Math.floor(x*2)+Math.floor(y*2))%5!==0)continue;tall.moveTo(x,y);tall.lineTo(x-.7,y-1.8);}tall.stroke();tall.restore();
  }
  function draw(ctx){lawnPath(ctx);ctx.strokeStyle='#e1dfc2';ctx.lineJoin='round';ctx.lineWidth=7;ctx.stroke();
-  for(const o of game.level.obstacles){if(o.type==='circle')circle(ctx,o.x,o.y,o.r+P.trim,'#bba782');else rounded(ctx,o.x-P.trim,o.y-P.trim,o.w+P.trim*2,o.h+P.trim*2,P.trim,'#bba782');}
+  for(const o of game.level.obstacles){if(o.type==='circle')circle(ctx,o.x,o.y,o.r+P.trim,'#bba782');}
   ctx.drawImage(lawn,0,0,P.width,P.height);ctx.drawImage(stripeLayer,0,0);ctx.drawImage(grass,0,0,P.width,P.height);ctx.strokeStyle='#34562a35';ctx.lineWidth=5;lawnPath(ctx);ctx.stroke();
  }
  function diagnostics(){return {ratio,builds,cachePixels:lawn.width*lawn.height+grass.width*grass.height+P.width*P.height*2,directionBytes:stripes.directions.byteLength};}
