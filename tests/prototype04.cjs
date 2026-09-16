@@ -99,15 +99,18 @@ test('Cat collision immediately loses and freezes the round, including a station
 test('Swept cat contact catches crossing between frame endpoints and rejects a near miss',()=>{
  const {catContact}=require('../dist/core.js');assert(catContact(100,100,200,100,150,50,150,150));assert(!catContact(100,100,200,100,150,131,150,131));
 });
-test('Wasps recur in one seeded round with separated locations and cooldown',()=>{
- const g=new Game('normal','garden3',undefined,{seed:42});g.started=true;g.cat.finished=true;run(g,90);assert(g.waspSpawns.length>=3);for(let i=1;i<g.waspSpawns.length;i++){const a=g.waspSpawns[i-1],b=g.waspSpawns[i];assert(b.time-a.time>=18);assert(Math.hypot(a.x-b.x,a.y-b.y)>=80);}assert(g.penalty<=400);
- const h=new Game('normal','garden3',undefined,{seed:42});h.started=true;h.cat.finished=true;run(h,90);assert.deepEqual(g.waspSpawns,h.waspSpawns);
- const j=new Game('normal','garden3',undefined,{seed:43});j.started=true;j.cat.finished=true;run(j,90);assert.notDeepEqual(g.waspSpawns,j.waspSpawns);
+// Hidden nests now need a crossing; time alone must never create a swarm.
+test('Encountered nests recur deterministically with separated locations and cooldown',()=>{
+ function trace(seed){const g=new Game('normal','garden3',undefined,{seed});g.started=true;g.mechanics.cat=false;for(const n of g.waspNests){g.x=n.x;g.y=n.y;g.encounterWasps(n.x-1,n.y,n.x,n.y);run(g,12);}return g;}
+ const g=trace(42),h=trace(42),j=trace(43);assert(g.waspSpawns.length>=2&&g.waspSpawns.length<=4);
+ for(let i=1;i<g.waspSpawns.length;i++){const a=g.waspSpawns[i-1],b=g.waspSpawns[i];assert(b.time-a.time>=6);assert(Math.hypot(a.x-b.x,a.y-b.y)>=130);}assert(g.penalty<=400);assert.deepEqual(g.waspSpawns,h.waspSpawns);assert.notDeepEqual(g.waspSpawns,j.waspSpawns);
 });
-test('Invalid wasp positions are rejected, including mower, obstacles and no-mow flowers',()=>{
- const {waspSpawnValid}=require('../dist/core.js');for(const garden of ['garden1','garden2','garden3']){const g=new Game('normal',garden);g.x=450;g.y=300;for(const p of [[NaN,100],[-100,300],[450,300],[302,208],[600,370]])assert(!waspSpawnValid(...p,g));const events=[];assert(g.spawnWasps(events));const p=g.waspSpawns[0];g.waspSpawns=[];assert(waspSpawnValid(p.x,p.y,g));assert(Math.hypot(p.x-g.x,p.y-g.y)>=90);}
- const g=new Game('normal','garden3');g.x=450;g.y=195;assert(!waspSpawnValid(615,195,g));g.random=()=>0;assert(!g.spawnWasps([]));assert.equal(g.waspSpawns.length,0);assert.equal(g.nextWaspAt,g.time+3);
+
+test('Invalid nest positions reject the start area, obstacles, borders and no-mow flowers',()=>{
+ const {waspSpawnValid}=require('../dist/core.js');for(const garden of ['garden1','garden2','garden3']){const g=new Game('normal',garden);for(const p of [[NaN,100],[-100,300],[g.x,g.y],[302,208],[600,370]])assert(!waspSpawnValid(...p,g));for(const n of g.waspNests)assert(waspSpawnValid(n.x,n.y,g));g.started=true;assert(!g.spawnWasps([]));}
+ const g=new Game('normal','garden3');assert(!waspSpawnValid(615,195,g));g.started=true;run(g,90);assert.equal(g.waspSpawns.length,0);
 });
+
 test('Repeated stings accumulate within a small cap and restart clears them',()=>{
  const g=new Game();g.started=true;for(let i=0;i<4;i++){g.nest={x:g.x,y:g.y,active:true,age:1,caught:false};g.updateWasps(1/120,[]);}assert.equal(g.waspStings,4);assert.equal(g.penalty,400);g.reset();assert.equal(g.penalty,0);assert.equal(g.waspStings,0);
 });

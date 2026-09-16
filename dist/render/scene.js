@@ -14,8 +14,9 @@ function create(game,P){
  const cache=document.createElement('canvas');
  // A modest world-space cache, including off-world decor; never a full DPR-sized texture.
  const bounds={x:-160,y:-160,w:P.width+320,h:P.height+320};cache.width=bounds.w;cache.height=bounds.h;
- let data,foregroundEntries=[];
+ let data,foregroundEntries=[],artVersion=-1;
  function reset(){
+  artVersion=KlippeAssets.revision?.()||0;
   data=KlippeSceneData.forLevel(game.level);const c=cache.getContext('2d');c.clearRect(0,0,cache.width,cache.height);c.save();c.translate(-bounds.x,-bounds.y);
   // Cache decor outside the lawn only; actor silhouettes are always drawn later.
   c.beginPath();c.rect(bounds.x,bounds.y,bounds.w,bounds.h);game.level.polygon.forEach((p,i)=>i?c.lineTo(...p):c.moveTo(...p));c.closePath();c.clip('evenodd');
@@ -26,7 +27,7 @@ function create(game,P){
   for(const v of data.obstacleVisuals)if(v.layer==='foreground'){const o=game.level.obstacles[v.colliderIndex];descriptors.push({...v,x:o.x,y:o.y,w:o.r*2*v.canopyFactor,h:o.r*2*v.canopyFactor});}
   foregroundEntries=descriptors.map(d=>{const tile=document.createElement('canvas'),padding=12,ratio=2;tile.width=Math.ceil((d.w+padding*2)*ratio);tile.height=Math.ceil((d.h+padding*2)*ratio);const ink=tile.getContext('2d');ink.scale(ratio,ratio);KlippeAssets.draw(ink,{...d,x:d.w/2+padding,y:d.h/2+padding,anchor:[.5,.5],rotation:0,scale:1});return {d,tile,padding};});
  }
- function background(ctx,view){const a=view.screenToWorld(0,0),b=view.screenToWorld(view.width,view.height);ctx.fillStyle=data.ground;ctx.fillRect(a.x,a.y,b.x-a.x,b.y-a.y);ctx.drawImage(cache,bounds.x,bounds.y);}
+ function background(ctx,view){if(artVersion!==(KlippeAssets.revision?.()||0))reset();const a=view.screenToWorld(0,0),b=view.screenToWorld(view.width,view.height);ctx.fillStyle=data.ground;ctx.fillRect(a.x,a.y,b.x-a.x,b.y-a.y);ctx.drawImage(cache,bounds.x,bounds.y);}
  function obstacles(ctx){for(const visual of data.obstacleVisuals){const o=game.level.obstacles[visual.colliderIndex];
   if(o.type==='circle')KlippeAssets.draw(ctx,{asset:'trunk',x:o.x,y:o.y,w:o.r*2,h:o.r*2});
   else KlippeAssets.draw(ctx,{...visual,x:o.x+o.w/2,y:o.y+o.h/2,w:o.w,h:o.h});

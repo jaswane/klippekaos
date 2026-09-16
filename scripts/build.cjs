@@ -8,9 +8,13 @@ fs.mkdirSync(path.join(base,'dist/assets'),{recursive:true});
 for(const [source,name] of [['public/klippe-kaos-logo.png','klippe-kaos-logo.png'],['app/icon.png','icon.png'],['public/vippsqr.png','vippsqr.png']]){
  fs.copyFileSync(path.join(base,source),path.join(base,'dist/assets',name));
 }
-fs.mkdirSync(path.join(base,'dist/assets/mowers'),{recursive:true});
-for(const spec of Object.values(require('../dist/render/mower.js').SPRITES)){
- fs.copyFileSync(path.join(base,'public/art/mowers',spec.id+'.png'),path.join(base,'dist',spec.src));
+const artPaths=new Set();
+for(const spec of Object.values(require('../dist/render/mower.js').SPRITES)){artPaths.add(spec.src);if(spec.riderSprite)artPaths.add(spec.riderSprite);}
+for(const spec of Object.values(require('../dist/render/assets.js').ART))artPaths.add(spec.src);
+for(const dest of artPaths){
+ const source=path.join(base,'public/art',dest.slice('assets/'.length)),target=path.join(base,'dist',dest),png=fs.readFileSync(source);
+ if(png.readUInt32BE(16)!==1254||png.readUInt32BE(20)!==1254||png[25]!==6)throw new Error('Unexpected art dimensions/alpha: '+source);
+ fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(source,target);
 }
 const html=fs.readFileSync(path.join(base,'dist/index.html'),'utf8');
 for(const match of html.matchAll(/(?:src|href)="([^"]+)"/g)){

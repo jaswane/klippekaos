@@ -54,9 +54,9 @@ function create(game,P){
  function reset({scale=1,dpr=1}={}){ratio=quality(scale,dpr);stripes.reset();stripeInk.clearRect(0,0,P.width,P.height);maskInk.clearRect(0,0,P.width,P.height);rebuild();}
  // Upgrade only, in half-DPR steps; resizing back never churns world caches.
  function resize(scale,dpr=1){const next=quality(scale,dpr);if(next<=ratio)return false;ratio=next;rebuild();return true;}
- function stroke(c,e,operation){c.save();c.globalCompositeOperation=operation;c.strokeStyle='#fff';c.lineWidth=P.deck*2;c.lineCap='round';c.beginPath();c.moveTo(e.fromX,e.fromY);c.lineTo(e.x,e.y);c.stroke();c.restore();}
+ function stroke(c,e,operation){c.save();c.globalCompositeOperation=operation;c.strokeStyle='#fff';c.lineWidth=(e.mowRadius??game.mowRadius??P.deck)*2;c.lineCap='round';c.beginPath();c.moveTo(e.fromX,e.fromY);c.lineTo(e.x,e.y);c.stroke();c.restore();}
  function cut(e){
-  if(!e?.moved)return;
+  if(!e?.moved)return;const radius=e.mowRadius??game.mowRadius??P.deck;
   // The existing continuous cut path is retained, including flower cuts. This mask is visual only.
   stroke(maskInk,e,'source-over');stroke(tall,e,'destination-out');
   if(e.fresh<=0)return;
@@ -65,13 +65,13 @@ function create(game,P){
   }
   // Small blade-shaped gaps break the perfect round visual edge. Persist them in
   // the visual cut mask so resize reproduces them; Game.mask is never touched.
-  for(const side of [-1,1]){const x=e.x-Math.sin(game.angle)*P.deck*side,y=e.y+Math.cos(game.angle)*P.deck*side;
+  for(const side of [-1,1]){const x=e.x-Math.sin(game.angle)*radius*side,y=e.y+Math.cos(game.angle)*radius*side;
    const hash=((Math.floor(x)*73856093)^(Math.floor(y)*19349663))>>>0;if(hash%4!==0)continue;
    for(const [c,operation] of [[maskInk,'source-over'],[tall,'destination-out']]){c.save();c.globalCompositeOperation=operation;c.strokeStyle='#fff';c.lineWidth=.8;c.lineCap='round';c.beginPath();c.moveTo(x,y+.5);c.lineTo(x+((hash%7)-3)*.2,y-1.2-(hash%5)*.18);c.stroke();c.restore();}
   }
   // Sparse short tips on remaining grass only: never refill a cut area or soften Game.mask.
   tall.save();tall.globalCompositeOperation='source-atop';tall.lineWidth=.6;tall.strokeStyle='#7c9a4d';tall.beginPath();
-  for(const side of [-1,1]){const x=e.x-Math.sin(game.angle)*(P.deck+1)*side,y=e.y+Math.cos(game.angle)*(P.deck+1)*side;if((Math.floor(x*2)+Math.floor(y*2))%5!==0)continue;tall.moveTo(x,y);tall.lineTo(x-.7,y-1.8);}tall.stroke();tall.restore();
+  for(const side of [-1,1]){const x=e.x-Math.sin(game.angle)*(radius+1)*side,y=e.y+Math.cos(game.angle)*(radius+1)*side;if((Math.floor(x*2)+Math.floor(y*2))%5!==0)continue;tall.moveTo(x,y);tall.lineTo(x-.7,y-1.8);}tall.stroke();tall.restore();
  }
  function draw(ctx){lawnPath(ctx);ctx.strokeStyle='#e1dfc2';ctx.lineJoin='round';ctx.lineWidth=7;ctx.stroke();
   for(const o of game.level.obstacles){if(o.type==='circle')circle(ctx,o.x,o.y,o.r+P.trim,'#bba782');else rounded(ctx,o.x-P.trim,o.y-P.trim,o.w+P.trim*2,o.h+P.trim*2,P.trim,'#bba782');}

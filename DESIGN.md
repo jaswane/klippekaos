@@ -1,6 +1,6 @@
-# Prototype 06.2 – implementert status
+# P06.3 + mower progression foundation – implementert status
 
-P06 viderefører P05.1 i samme statiske Canvas-spill. Grunnfysikk, baneformatet 900×580, kollisjonsmodell, scoring og fullføringskravet på 99,5 % videreføres. Ingen backend, økonomi eller klipperoppgraderinger.
+P06 viderefører P05.1 i samme statiske Canvas-spill. Grunnfysikk, baneformatet 900×580, kollisjonsmodell, scoring og fullføringskravet på 99,5 % videreføres. Ingen backend eller økonomi. Lokale klipperprofiler er tilgjengelige via Art QA; vanlig spill starter med standardklipperen.
 
 ## Karriere
 
@@ -12,7 +12,7 @@ Hvert nivå har eksplisitte mekanikkflagg. De tre testhagene er separate fra kar
 | 2 – L-hagen | Tungt gress | L-form med hekk, terrasse og parasoll i innhakket |
 | 3 – Kurvehagen | Katt | Organisk plen, busker, terrasse og parasoll |
 | 4 – Blomsterhagen | Markblomster som skal skånes | Egen åpen åttekant, to blomsterøyer og kantdekor |
-| 5 – Sommerhagen | Gjentakende jordveps | Egen større, åpen sekskant, basseng, terrasse og parasoll |
+| 5 – Sommerhagen | Skjulte jordvepsbol | Egen større, åpen sekskant, basseng, terrasse og parasoll |
 
 Nivå 1 har ingen katt, veps, markblomster eller tungt gress. Nivå 2–5 aktiverer bare den nye terreng-/faretypen i tabellen; de kombinerer ikke alle tidligere utfordringer. Pickups, skjult energifunn og plenskade ved stillstand er deaktivert i karrieren. Boost er fortsatt tilgjengelig. Miljødekor utenfor plenen påvirker ikke kollisjon, coverage eller scoring.
 
@@ -22,9 +22,9 @@ Fullført, opplåst karrierenivå i normalmodus åpner neste nivå, maksimalt ni
 
 - Tungt, uklippet gress gir opptil **25 % lavere fart**. Belastningen måles foran aggregatet; styreresponsen er beholdt. Ferdigklippet gress bremser ikke.
 - Markblomster er kjørbare, men skal skånes. De inngår ikke i nødvendig plenareal; skade telles én gang per celle og gir opptil 180 poeng i trekk. Små bier er dekor.
-- Kattetreff gir umiddelbart game over, uten automatisk bremsing eller unnamanøver. Den eksisterende kontrollen av relativ bevegelse mellom fysikksteg er beholdt.
+- Kattetreff gir umiddelbart game over, uten automatisk bremsing eller unnamanøver. Første ankomst er ved 18 sekunder; etter passeringen følger 13,5 sekunders pause før neste 1,5-sekunders varsel. Variant, fart og rute beholdes gjennom runden. Kontrollen av relativ bevegelse mellom fysikksteg er beholdt.
 - Katt og jordveps deler en enkel faresperre: én dynamisk fare om gangen, inkludert kattens varsling. Etter avsluttet fare er det minst tre sekunders mellomrom. En utsatt katt beholder 1,5 sekunders forvarsel.
-- Jordveps bruker tilfeldige gyldige steder utenfor klipperen: første hendelse etter 12–18 sekunder, deretter 18–26 sekunders cooldown. Varsling før forfølgelse er fortsatt 0,9 sekunder. Maks samlet vepsestraff er 400 poeng.
+- Jordveps kommer fra 2–4 skjulte, seedede bol per relevant runde/nivå. Aggregatets passering gjennom uklippet gress utløser bolet én gang; tid alene utløser ingen hendelse. Bol venter i kø ved katt eller aktiv sverm. Maks fire hendelser, 0,9 sekunders varsel, seks sekunders pause mellom svermer og 200 poeng per stikk / 400 samlet. Plassering holder minst 56 verdensenheter fra kanter/hindringer, 110 fra start og 130 mellom bol, og unngår blomster.
 
 ## Presentasjon og lagring
 
@@ -94,3 +94,24 @@ Prosjekteier har visuelt godkjent P06.1 mot designreferansen. Fysikk, styring, f
 - Aktiv scene undertrykker contextmenu, høyre auxclick, native drag og markering. Avslutningen av samme høyreklikkssekvens beskyttes i opptil 500 ms etter slipp; nytt trykk nullstiller dette. Vanlige høyreklikk i HUD/meny/dialoger beholdes.
 - **141/141 tester**, build og diffkontroll består. Nettleser-QA omfatter desktop/laptop, mobil landscape ned til 260 px effektiv høyde, safe areas, sprite/rotasjon, foreground-fade, pause/restart og event-kansellering, uten registrerte konsollfeil. Prosjekteier har fysisk godkjent høyreknapp-revers og samlet release.
 - Gjenstående maskinvare-QA: iPhone/iPad multitouch, Safari-chrome/rotasjon, lav skjermhøyde og ytelse. Personen er et statisk bilde og kan visuelt overlappe faste objekter ved tett manøvrering; dette endrer ikke kollisjon.
+
+## Klipperprofiler og lokal art-integrasjon
+
+| Profil | Fart | Klippebredde | Styring |
+|---|---:|---:|---:|
+| Standard skyveklipper | 1,00 | 1,00 | 1,00 |
+| Gul skyveklipper | 1,04 | 1,03 | 1,00 |
+| Premium skyveklipper | 1,10 | 1,08 | 1,02 |
+| Kompakt sitteklipper | 1,18 | 1,18 | 0,98 |
+| Hagetraktor | 1,24 | 1,26 | 0,96 |
+| Zero-turn | 1,30 | 1,32 | 1,08 |
+
+Klippe-radius er 23 × breddefaktor, uavhengig av kollisjonsradius 14. Fartsmultiplikatoren gjelder frem og revers; akselerasjon, input, scoring, 99,5 %-krav, Ferdig nå, progresjon og lagringsformat videreføres. Art QA bytter profil og utseende samlet uten å nullstille runden.
+
+Sitteklippernes world-scale er økt 10/14/16 %. Separate rider-overlays har kildepikselbaserte anchors, grep, diskret bevegelse og visuell forkorting av underkroppen. Godkjent mapping følger motivet: `mower-05-zero-turn-yellow.png` brukes av hagetraktor med `rider-04-ride-tractor.png`; `mower-04-ride-tractor-yellow.png` brukes av zero-turn med `rider-05-zero-turn.png`. Filnavn og PNG-er er urørt. Tre skyveklippere bruker den eksisterende gåsyklusen; Canvas-klipper er fallback.
+
+Ni lokale environment-assets dekker trær, busker, hekk, potte, stol, parasoll og steinbed. Metadata bestemmer utsnitt, størrelse og variasjon; cache oppdateres når bilder lastes. Foreground-fade omfatter også rider. Banegeometri og solide hindringer er uendret.
+
+Art QA (`npm run art:qa`, port 4191) viser profil, seed, bol/hendelser og valgfrie bolmarkører, samt kjøre-, canopy- og rider-testscener. Det injiseres bare av lokal QA-server, ikke produksjonsbygget.
+
+**180/180 tester**, build og diffkontroll består. Nettleser-QA ved 1440×900, 1280×720 og 844×390 viste ingen sidescroll eller konsollfeil; rider-plassering, varsler, bolutløsning og mobilpause er kontrollert. Bredeste aggregat når 99,81279150460759 % i geometrisk blomstersikker test uten skade. Prosjekteier har fysisk godkjent klipperprofiler, større sitteklippere, gjentakende katt, skjulte bol og Art QA. Fysisk Safari/iPad-ytelse og multitouch er fortsatt relevante maskinvarekontroller.

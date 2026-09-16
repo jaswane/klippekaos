@@ -9,7 +9,8 @@
     "dev": "node scripts/serve.cjs",
     "start": "node scripts/serve.cjs",
     "build": "node scripts/build.cjs",
-    "test": "node scripts/test.cjs"
+    "test": "node scripts/test.cjs",
+    "art:qa": "npm run build && node scripts/art-qa.cjs"
   },
   "engines": {
     "node": ">=20"

@@ -1,6 +1,6 @@
 # KlippeKaos – Gressklipperspillet
 
-**Prototype 06.2** er et gratis nettspill om å klippe plenen, laget av Swane Creative med HTML, CSS og Canvas/JavaScript.
+**P06.3 + mower progression foundation** er et gratis nettspill om å klippe plenen, laget av Swane Creative med HTML, CSS og Canvas/JavaScript.
 
 Karriere har fem nivåer: Den lille hagen (styring og vanlig plen), L-hagen (tungt gress), Kurvehagen (katt), Blomsterhagen (markblomster) og Sommerhagen (jordveps). Fullføring låser opp neste nivå lokalt. Testhagene og Tidspress på 60 sekunder er separate valg.
 
@@ -23,7 +23,7 @@ npm test
 npm run build
 ```
 
-P06.2 har **141/141 beståtte tester**, inkludert tidligere regresjoner og tester for miljø, mobil viewport, sprite-anchor, revers og native musehendelser. Byggkommandoen validerer JavaScript, HTML-ID-er og lokale ressursreferanser. Se [DESIGN.md](DESIGN.md) for implementert mekanikk og QA-status.
+Denne iterasjonen har **180/180 beståtte tester**, inkludert tidligere regresjoner, art/rider-integrasjon, klipperprofiler, separat klippebredde, gjentakende katt og skjulte vepsbol. Byggkommandoen validerer JavaScript, HTML-ID-er og lokale ressursreferanser. Se [DESIGN.md](DESIGN.md) for implementert mekanikk og QA-status.
 
 ## P06 – visual foundation
 
@@ -47,6 +47,14 @@ Mobil landscape har kompakt HUD, mindre touch-overlays og tilpasning til visualV
 
 Prosjekteier har fysisk testet og godkjent høyreknapp-revers og godkjent den samlede P06.2-releasen. Fysikk, coverage, scoring, progresjon og lagring er uendret.
 
+## Klipperprofiler, art og farer
+
+Seks lokale klipperprofiler gir gradvis høyere fart og bredere klipping, med separat styringsmultiplikator. Kollisjonsradius er uendret; større klippebredde brukes av både klippeberegning og plenrendering. De tre sitteklipperne er visuelt økt 10/14/16 % og har separate rider-overlays med grep tilpasset ratt eller spaker. PNG-originalene er urørt. Miljøsettet bruker lokale bilder for trær, busker, hekk, potter, stol, parasoll og steinbed, med Canvas-fallback og foreground-fade.
+
+Katten kan passere flere ganger: første ankomst etter 18 sekunder, deretter 13,5 sekunders pause før neste 1,5-sekunders varsel. Jordveps kommer fra 2–4 skjulte, seedede bol som klippeaggregatet må passere. Hvert bol brukes én gang; maks fire hendelser, 0,9 sekunders varsel og seks sekunders pause mellom svermer. Katt og veps koordineres fortsatt; samlet vepsestraff er maks 400.
+
+`npm run art:qa` åpner en lokal server på http://127.0.0.1:4191 med klippervalg, profilverdier, seed, boltellere og testscener. Verktøyet leveres ikke i produksjons-UI. Standardklipperen er fortsatt standard i vanlig spill; ingen butikk, økonomi eller ny nivåopplåsing er innført. Prosjekteier har fysisk testet og godkjent profiler, art, gjentakende katt, skjulte bol og Art QA.
+
 ## Lagring og støtte
 
 Nivåopplåsing og topp fem per bane/modus lagres i localStorage under `klippekaos-p05`. Kvalifiserende forsøk registreres med nøyaktig tre initialer (A–Z/0–9). P04-data migreres ikke og overskrives ikke. Innstillinger bruker `klippekaos-settings`. Data følger ikke automatisk med til en annen nettleser eller adresse.
@@ -58,8 +66,8 @@ Nivåopplåsing og topp fem per bane/modus lagres i localStorage under `klippeka
 Importer repoets rot i Vercel. `vercel.json` angir `npm run build` og output-mappen `dist`. Ingen backend, database eller miljøvariabler kreves.
 
 - `dist/`: redigerbare statiske spillfiler, inkludert `input.js`, `mouse-input.js`, `profile.js`, `scene-data.js` og `render/`.
-- `scripts/`, `tests/`: lokal server, byggvalidering og P01–P06.2-tester.
-- `public/art/mowers/mower-01-push.png`: kopieres til `dist/assets/mowers/` ved build.
+- `scripts/`, `tests/`: lokal server, Art QA, byggvalidering og regresjonstester.
+- `public/art/`: lokale mower-, rider- og environment-PNG-er kopieres til `dist/assets/` etter render-metadata ved build.
 - `app/icon.png`, `public/klippe-kaos-logo.png`, `public/vippsqr.png`: kopieres til `dist/assets/` ved build. HTML refererer eksplisitt til PNG-logo, favicon/apple-touch-icon og QR. Ingen Next.js metadata-routing brukes.
 
 Fysisk mobil/iPad, multitouch, virtuelt tastatur, QR-skanning og menneskelig fullføring rundt markblomstene bør fortsatt testes på maskinvare.
