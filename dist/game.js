@@ -10,8 +10,8 @@ let unlocked=1,pendingScore=null,mowerProgress=KlippeProfile.mowerState(),pendin
 let profileStorage;try{profileStorage=window.KlippeQAStorage||localStorage;}catch{}
 try{const profile=KlippeProfile.load(profileStorage);book=profile.book;unlocked=profile.unlocked;mowerProgress={selectedMower:profile.selectedMower,unlockedMowers:profile.unlockedMowers};storageOK=storageOK&&profile.ok;}catch{storageOK=false;}
 function saveProfile(){try{storageOK=KlippeProfile.save(profileStorage,book,unlocked,mowerProgress);}catch{storageOK=false;}}
-function chooseMower(id){if(!KlippeProfile.selectMower(mowerProgress,id))return false;saveProfile();$('selectedMowerName').textContent=KlippeMower.SPRITES[id].name;return true;}
-function mowerMenu(){KlippeMowerMenu.choices($('mowerChoices'),mowerProgress,id=>{if(chooseMower(id)){mowerMenu();$('mowerSelectionStatus').textContent=KlippeMower.SPRITES[id].name+' er valgt for Karriere.';$('mowerChoices').querySelector('[aria-pressed="true"]').focus({preventScroll:true});}});}
+function chooseMower(id){if(!KlippeProfile.selectMower(mowerProgress,id))return false;saveProfile();$('selectedMowerName').textContent=KlippeMower.SPRITES[id].name;if(onMenu)updateMenuPreview();return true;}
+function mowerMenu(){$('mowerInventory').textContent=mowerProgress.unlockedMowers.length+' av '+Object.keys(Klippe.mowerProfiles).length+' klippere tilgjengelig · valgt: '+KlippeMower.SPRITES[mowerProgress.selectedMower].name;KlippeMowerMenu.choices($('mowerChoices'),mowerProgress,id=>{if(chooseMower(id)){mowerMenu();$('mowerSelectionStatus').textContent=KlippeMower.SPRITES[id].name+' er valgt for Karriere.';$('mowerChoices').querySelector('[aria-pressed="true"]').focus({preventScroll:true});}});}
 function presentMowerUnlock(ids){pendingMower=ids[0]||null;$('mowerUnlock').hidden=!pendingMower;if(!pendingMower)return;
  const spec=KlippeMower.SPRITES[pendingMower];$('unlockedMowerName').textContent=spec.name;$('unlockChoice').textContent='Velg klipper for neste runde.';$('unlockActions').hidden=false;$('unlockedMowerImage').setAttribute('aria-label',spec.name);KlippeMowerMenu.preview($('unlockedMowerImage'),pendingMower);
 }
@@ -20,6 +20,23 @@ function careerMenu(){
  const selected=$('careerLevel').value||'career1';$('careerLevel').replaceChildren();
  for(const level of Object.values(Klippe.careerLevels)){const option=document.createElement('option');option.value=level.id;option.textContent=level.stage+' · '+level.name+(level.stage>unlocked?' · låst':'');option.disabled=level.stage>unlocked;$('careerLevel').append(option);}
  $('careerLevel').value=selected;$('careerLabel').textContent=Klippe.careerLevels[selected].stage+' · '+Klippe.careerLevels[selected].name+' →';
+}
+// P07B menu state only: native radios retain standard keyboard behaviour.
+function updateMenuPreview(){
+ if(!onMenu)return;
+ const career=$('modeCareer').checked,garden=career?$('careerLevel').value:$('timedGarden').value,level=Klippe.levelFor(garden),mode=career?'normal':'timed';
+ const mower=career?mowerProgress.selectedMower:KlippeProfile.defaultMower;game.setMowerProfile(mower);KlippeMower.setAppearance(game,mower);
+ game.reset(mode,garden);initGrass();
+ $('previewMode').textContent=career?'KARRIERE':'TIDSPRESS';
+ $('previewNumber').textContent=career?'HAGE '+String(level.stage).padStart(2,'0')+' / 05':'60 SEKUNDER';
+ $('previewTitle').textContent=level.name;
+ $('menuPreview').setAttribute('aria-label','Forhåndsvisning: '+level.name);
+ $('timedGardenName').textContent=Klippe.levelFor($('timedGarden').value).name;
+ const best=book[garden+':'+mode];$('menuRecord').textContent=best?'Din beste score: '+scoreText(best.score):'Klar for første runde?';
+}
+function selectMenuMode(mode){
+ const career=mode==='career';$('modeCareer').checked=career;$('modeTimed').checked=!career;
+ $('careerSetup').hidden=!career;$('timedSetup').hidden=career;updateMenuPreview();
 }
 function scoreGate(waiting){for(const id of ['again','resultMenu','nextLevel'])$(id).disabled=waiting;}
 
@@ -136,9 +153,8 @@ function startGame(mode,garden){
 function showMenu(){
  careerMenu();onMenu=true;paused=false;keys.clear();clearTouch();clippings.clear();rings=[];cutLevel=0;accumulator=0;
  $('menu').hidden=false;$('play').hidden=true;$('result').hidden=true;$('pause').hidden=true;
- game.reset('normal',$('timedGarden').value);initGrass();sound.update();
- const b=book[recordKey(game)];$('menuRecord').textContent=b?'Din beste score her: '+scoreText(b.score):'Klar for første runde?';
- $('career').focus();window.scrollTo(0,0);
+ updateMenuPreview();sound.update();
+ ($('modeCareer').checked?$('modeCareer'):$('modeTimed')).focus();window.scrollTo(0,0);
 }
 function pause(value){if(onMenu||game.done)return;paused=value;keys.clear();clearTouch();cutLevel=0;$('pause').hidden=!value;if(value)$('resume').focus();else canvas.focus();sound.update();}
 function saveSettings(){
@@ -160,7 +176,9 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&game.start
 $('mowerButton').onclick=()=>{mowerMenu();$('mowerSelectionStatus').textContent='';$('mowerDialog').showModal();};
 function resolveMowerUnlock(use){if(!pendingMower)return;if(use)chooseMower(pendingMower);$('unlockChoice').textContent='Neste runde: '+KlippeMower.SPRITES[mowerProgress.selectedMower].name;$('unlockActions').hidden=true;pendingMower=null;if(pendingScore)$('initials').focus({preventScroll:true});else $('nextLevel').hidden?$('again').focus():$('nextLevel').focus();}
 $('useUnlockedMower').onclick=()=>resolveMowerUnlock(true);$('keepMower').onclick=()=>resolveMowerUnlock(false);
-$('careerLevel').onchange=careerMenu;
+$('careerLevel').onchange=()=>{careerMenu();updateMenuPreview();};
+$('modeCareer').onchange=()=>selectMenuMode('career');$('modeTimed').onchange=()=>selectMenuMode('timed');
+$('devButton').onclick=()=>$('devDialog').showModal();
 $('career').onclick=()=>{const level=Klippe.careerLevels[$('careerLevel').value];if(level&&level.stage<=unlocked)startGame('normal',level.id);};
 $('nextLevel').onclick=()=>{if(game.level.stage<unlocked)startGame('normal','career'+(game.level.stage+1));};
 // Keep the existing form reachable when a soft keyboard reduces the visual viewport.
@@ -183,9 +201,9 @@ fitResultViewport();
 $('initials').oninput=()=>{$('initials').value=KlippeProfile.normalizeInitials($('initials').value);};
 $('initialsForm').onsubmit=e=>{e.preventDefault();const initials=KlippeProfile.normalizeInitials($('initials').value);if(!pendingScore||!KlippeProfile.validInitials(initials))return;book=KlippeProfile.submit(book,pendingScore,initials);pendingScore=null;saveProfile();scoreGate(false);$('initialsForm').hidden=true;$('scoreSaved').hidden=false;$('scoreSaved').textContent=storageOK?'Highscore lagret!':'Highscore beholdes bare i denne økten.';renderRows('resultRuns',book[recordKey(game)]?.runs||[],true);records();$('nextLevel').hidden?$('again').focus({preventScroll:true}):$('nextLevel').focus({preventScroll:true});};
 $('timeTrial').onclick=()=>startGame('timed',$('timedGarden').value);
-$('testGarden').onclick=()=>startGame('normal','garden2');
-$('organicGarden').onclick=()=>startGame('normal','garden3');
-$('timedGarden').onchange=()=>{game.reset('normal',$('timedGarden').value);initGrass();const b=book[recordKey(game)];$('menuRecord').textContent=b?'Din beste score her: '+scoreText(b.score):'Klar for første runde?';};
+$('testGarden').onclick=()=>{$('devDialog').close();startGame('normal','garden2');};
+$('organicGarden').onclick=()=>{$('devDialog').close();startGame('normal','garden3');};
+$('timedGarden').onchange=updateMenuPreview;
 $('howButton').onclick=()=>$('helpDialog').showModal();$('settingsButton').onclick=openSettings;$('pauseSettings').onclick=openSettings;$('aboutButton').onclick=openAbout;$('pauseAbout').onclick=openAbout;
 document.querySelectorAll('[data-close]').forEach(button=>button.onclick=()=>$(button.dataset.close).close());
 $('soundSetting').checked=settings.sound;$('volumeSetting').value=Math.round(settings.volume*100);$('motionSetting').checked=settings.reduced;
@@ -248,4 +266,4 @@ function frame(now){
  if(onMenu){const c=$('menuPreview').getContext('2d');c.clearRect(0,0,900,580);c.drawImage(canvas,0,0);}
  requestAnimationFrame(frame);
 }
-careerMenu();initGrass();records();saveSettings();requestAnimationFrame(frame);
+careerMenu();selectMenuMode('career');records();saveSettings();requestAnimationFrame(frame);

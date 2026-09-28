@@ -1,4 +1,4 @@
-# P06.3 + Karriere-klipperprogresjon – implementert status
+# P07A – implementert status
 
 P06 viderefører P05.1 i samme statiske Canvas-spill. Grunnfysikk, baneformatet 900×580, kollisjonsmodell, scoring og fullføringskravet på 99,5 % videreføres. Ingen backend eller økonomi. Seks klipperprofiler låses opp gjennom Karriere og velges i hovedmenyen; en ny profil starter med standardklipperen.
 
@@ -10,11 +10,11 @@ Hvert nivå har eksplisitte mekanikkflagg. De tre testhagene er separate fra kar
 |---|---|---|
 | 1 – Den lille hagen | Vanlig plen og faste hindringer | Rektangel, terrasse, potter og hekk |
 | 2 – L-hagen | Tungt gress | L-form med hekk, terrasse og parasoll i innhakket |
-| 3 – Kurvehagen | Hyppigere katt | Organisk plen, busker, terrasse og parasoll |
+| 3 – Kurvehagen | Katt | Organisk plen, busker, terrasse og parasoll |
 | 4 – Blomsterhagen | Markblomster som skal skånes | Egen åpen åttekant, to blomsterøyer og kantdekor |
 | 5 – Sommerhagen | Skjulte jordvepsbol | Egen større, åpen sekskant, basseng, terrasse og parasoll |
 
-Katt er aktiv på alle Karriere-nivåer. Nivå 1 har ellers ingen veps, markblomster eller tungt gress. Tungt gress finnes på nivå 2, markblomster på nivå 4 og skjulte vepsbol bare på nivå 5; nivåene kombinerer ikke alle tidligere terrengutfordringer. Pickups, skjult energifunn og plenskade ved stillstand er deaktivert i karrieren. Boost er fortsatt tilgjengelig. Miljødekor utenfor plenen påvirker ikke kollisjon, coverage eller scoring.
+Katt er aktiv på alle Karriere-nivåer, med sen og sjelden passering på nivå 1–2. Nivå 1 har ellers ingen veps, markblomster eller tungt gress. Tungt gress finnes på nivå 2, markblomster på nivå 4 og skjulte vepsbol bare på nivå 5; nivåene kombinerer ikke alle tidligere terrengutfordringer. Pickups, skjult energifunn og plenskade ved stillstand er deaktivert i karrieren. Boost er fortsatt tilgjengelig. Miljødekor utenfor plenen påvirker ikke kollisjon, coverage eller scoring.
 
 Fullført, opplåst karrierenivå i normalmodus åpner neste nivå, maksimalt nivå 5. Tap og Tidspress låser ikke opp nivåer. Valgt nivå og låste valg vises i menyen; resultatkortet tilbyr neste nivå etter fullføring.
 
@@ -22,7 +22,7 @@ Fullført, opplåst karrierenivå i normalmodus åpner neste nivå, maksimalt ni
 
 - Tungt, uklippet gress gir opptil **25 % lavere fart**. Belastningen måles foran aggregatet; styreresponsen er beholdt. Ferdigklippet gress bremser ikke.
 - Markblomster er kjørbare, men skal skånes. De inngår ikke i nødvendig plenareal; skade telles én gang per celle og gir opptil 180 poeng i trekk. Små bier er dekor.
-- Kattetreff gir umiddelbart game over, uten automatisk bremsing eller unnamanøver. Karriere-nivå 1–5 har første ankomst ved 30/25/18/18/18 sekunder, cooldown etter passering på 28/22/17/16/13,5 sekunder før neste 1,5-sekunders varsel og maks 2/2/3/3/4 passeringer. Testhagene beholder første ankomst ved 18 sekunder og cooldown 13,5 sekunder. Variant, fart og rute beholdes gjennom runden. Kontrollen av relativ bevegelse mellom fysikksteg er beholdt.
+- Kattetreff gir umiddelbart game over, uten automatisk bremsing eller unnamanøver. Karriere-nivå 1/2/3/4/5 har første ankomst ved 33/26/18/18/18 sekunder, cooldown etter passering på 28/22/17/16/13,5 sekunder før neste 1,5-sekunders varsel og maks 1/2/3/3/4 passeringer. Testhagene beholder første ankomst ved 18 sekunder og cooldown 13,5 sekunder. I testhagene beholdes variant og rute gjennom runden. I Karriere velges variant og rute per passering, stabilt fra varselet til exit. Kattens fart og hitbox er uendret. Kontrollen av relativ bevegelse mellom fysikksteg er beholdt.
 - Katt og jordveps deler en enkel faresperre: én dynamisk fare om gangen, inkludert kattens varsling. Etter avsluttet fare er det minst tre sekunders mellomrom. En utsatt katt beholder 1,5 sekunders forvarsel.
 - Jordveps kommer fra 2–4 skjulte, seedede bol per relevant runde/nivå. Aggregatets passering gjennom uklippet gress utløser bolet én gang; tid alene utløser ingen hendelse. Bol venter i kø ved katt eller aktiv sverm. Maks fire hendelser, 0,9 sekunders varsel, seks sekunders pause mellom svermer og 200 poeng per stikk / 400 samlet. Plassering holder minst 56 verdensenheter fra kanter/hindringer, 110 fra start og 130 mellom bol, og unngår blomster.
 
@@ -123,3 +123,9 @@ Standardklipper er åpen fra start. `unlockAfterCareerLevel` låser opp gul skyv
 Resultatkortet viser «Ny klipper låst opp!» med «Bruk denne» / «Fortsett med nåværende» bare første gang. Valget gjelder Karriere; testhager og Tidspress starter med standardklipper. Unlock lagres før initialregistrering, så reload/replay ikke gjentar belønningen.
 
 `selectedMower` og `unlockedMowers` legges til under eksisterende `klippekaos-p05`. Manglende valg gir standardklipper; opplåsinger utledes fra eksisterende progresjon og lagrede fullføringer. Tilgang til nivå 5 beviser bare fullført nivå 4; zero-turn krever dokumentert nivå 5-fullføring. Highscores, opprinnelige datoer og historiske rekorder bevares.
+
+## P07A – areal og hendelsesvariasjon
+
+212/212 automatiske tester, build og diffkontroll består. Nivå 1 er 44,80 % mindre, nivå 2 er 23,25 % mindre og nivå 4 er 8,88 % større. Nivå 3 og 5 beholder arealet; alle fem vokser nå i rekkefølge. Katt velger seedet mellom 3/4/5/4/5 ruter på nivå 1/2/3/4/5 og tre varianter per hendelse uten umiddelbar gjentakelse. Testhager, fysikk, scoring og miljøgrafikk er bevart.
+
+Se [P07A.md](P07A.md) for målemetode, rutekoordinater, visuell QA og skillet mellom tidsmål og verifisert spilletid. Historiske QA- og godkjenningsnotater over gjelder sine tidligere iterasjoner.

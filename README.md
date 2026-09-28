@@ -1,8 +1,8 @@
 # KlippeKaos – Gressklipperspillet
 
-**P06.3 + Karriere-klipperprogresjon** er et gratis nettspill om å klippe plenen, laget av Swane Creative med HTML, CSS og Canvas/JavaScript.
+**P07A – kortere karriere og variert katt** er et gratis nettspill om å klippe plenen, laget av Swane Creative med HTML, CSS og Canvas/JavaScript.
 
-Karriere har fem nivåer: Den lille hagen (styring og vanlig plen), L-hagen (tungt gress), Kurvehagen (hyppigere katt), Blomsterhagen (markblomster) og Sommerhagen (jordveps). Katt kan forekomme på alle fem nivåer, med senere og færre passeringer i starten. Fullføring låser opp neste nivå og en ny klipper lokalt. Testhagene og Tidspress på 60 sekunder er separate valg.
+Karriere har fem nivåer: Den lille hagen (styring og vanlig plen), L-hagen (tungt gress), Kurvehagen (katt), Blomsterhagen (markblomster) og Sommerhagen (jordveps). Klippbart areal øker for hvert nivå. Katt kan forekomme på alle fem nivåer, med sen og sjelden passering på nivå 1–2. Fullføring låser opp neste nivå og en ny klipper lokalt. Testhagene og Tidspress på 60 sekunder er separate valg.
 
 ## Kjør lokalt
 
@@ -23,7 +23,7 @@ npm test
 npm run build
 ```
 
-Denne iterasjonen har **196/196 beståtte tester**, inkludert tidligere regresjoner, klipperopplåsing/valg, profilmigrering, nivåspesifikk katt og blomsterbed uten endret kollisjon. Byggkommandoen validerer JavaScript, HTML-ID-er og lokale ressursreferanser. Se [DESIGN.md](DESIGN.md) for implementert mekanikk og QA-status.
+Denne iterasjonen har **212/212 beståtte tester**, inkludert tidligere regresjoner, klipperopplåsing/valg, profilmigrering, nivåspesifikk katt og blomsterbed uten endret kollisjon. Byggkommandoen validerer JavaScript, HTML-ID-er og lokale ressursreferanser. Se [P07A.md](P07A.md) for eksakte arealer, katteruter og begrensningene i tidsestimatene, og [DESIGN.md](DESIGN.md) for mekanikk.
 
 ## P06 – visual foundation
 
@@ -51,13 +51,13 @@ Prosjekteier har fysisk testet og godkjent høyreknapp-revers og godkjent den sa
 
 Seks lokale klipperprofiler gir gradvis høyere fart og bredere klipping, med separat styringsmultiplikator. Kollisjonsradius er uendret; større klippebredde brukes av både klippeberegning og plenrendering. De tre sitteklipperne er visuelt økt 10/14/16 % og har separate rider-overlays med grep tilpasset ratt eller spaker. PNG-originalene er urørt. Miljøsettet bruker lokale bilder for trær, busker, hekk, potter, stol, parasoll og steinbed, med Canvas-fallback og foreground-fade.
 
-Karriere har nivåspesifikk kattfrekvens: første ankomst etter 30/25/18/18/18 sekunder, pause før neste varsel på 28/22/17/16/13,5 sekunder og maks 2/2/3/3/4 passeringer. Varslet varer fortsatt 1,5 sekunder. Jordveps introduseres på Karriere-nivå 5 og kommer fra 2–4 skjulte, seedede bol som klippeaggregatet må passere. Hvert bol brukes én gang; maks fire hendelser, 0,9 sekunders varsel og seks sekunders pause mellom svermer. Katt og veps koordineres fortsatt; samlet vepsestraff er maks 400.
+Karriere-nivå 1/2/3/4/5 har første kattankomst etter 33/26/18/18/18 sekunder, pause før neste varsel på 28/22/17/16/13,5 sekunder og maks 1/2/3/3/4 passeringer. Hver passering velger blant 3/4/5/4/5 banespesifikke løpelinjer og tre eksisterende kattvarianter, seedet uten umiddelbar gjentakelse. Valget er stabilt fra varselet til katten har forlatt skjermen. Varslet varer fortsatt 1,5 sekunder. Jordveps introduseres på Karriere-nivå 5 og kommer fra 2–4 skjulte, seedede bol som klippeaggregatet må passere. Hvert bol brukes én gang; maks fire hendelser, 0,9 sekunders varsel og seks sekunders pause mellom svermer. Katt og veps koordineres fortsatt; samlet vepsestraff er maks 400.
 
 `npm run art:qa` åpner en lokal server på http://127.0.0.1:4191 med klippervalg, profilverdier, seed, boltellere og testscener. Verktøyet leveres ikke i produksjons-UI. QA-profilen bruker separat sessionStorage og påvirker ikke vanlig profil. Ingen butikk eller økonomi er innført.
 
 Karriere starter med standardklipper. Fullføring av nivå 1–5 låser opp gul skyveklipper, premium, kompakt sitteklipper, hagetraktor og zero-turn. Kravene ligger i `unlockAfterCareerLevel`; alle seks klippere vises i menyen, og alle opplåste kan velges fritt. Førstegangsopplåsing vises på resultatkortet med «Bruk denne» / «Fortsett med nåværende». Stats og godkjent rider-/bilde-mapping er beholdt.
 
-Eksisterende blomsterbed bruker `public/art/environment/flower-bed-stone-01.png` med uendret collider. Gammel rektangulær prototypegrafikk er fjernet; collider-outline finnes bare i Art QA. Prosjekteier har fysisk testet og godkjent Karriere-progresjon, klipperopplåsing, kattfrekvens og blomsterbed.
+Eksisterende blomsterbed bruker `public/art/environment/flower-bed-stone-01.png` med uendret collider. Gammel rektangulær prototypegrafikk er fjernet; collider-outline finnes bare i Art QA. Prosjekteier godkjente den foregående iterasjonens Karriere-progresjon, klipperopplåsing, kattfrekvens og blomsterbed. P07A har separat QA-status i rapporten.
 
 ## Lagring og støtte
 

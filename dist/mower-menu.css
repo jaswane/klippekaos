@@ -7,3 +7,16 @@
 @media(max-width:600px){.mower-card{padding:9px}.mower-stats{font-size:10px;column-gap:4px}.mower-stats dd{letter-spacing:0}.mower-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mower-card h3{font-size:14px}.mower-menu-button{flex-wrap:wrap}}
 
 #mowerDialog .close-dialog{min-width:44px;height:44px}
+
+/* P07B: distinguish availability from selection without changing unlock rules. */
+#mowerDialog{border-radius:10px}
+#mowerDialog .mower-inventory{font-size:12px;font-weight:600;line-height:1.5;padding:10px 0;border-block:1px solid #c9d4bd;margin:12px 0 18px;color:#345139}
+#mowerDialog .mower-card{border-radius:5px;background:#f1f4e8;box-shadow:none}
+#mowerDialog .mower-card[data-selected=true]{border-color:#456638;border-top:4px solid #456638;padding-top:9px;background:#e7edcd}
+#mowerDialog .mower-card[data-locked=true]{background:#edeee7;border-color:#d4d8cd}
+#mowerDialog .mower-card[data-locked=true] .mower-preview{filter:grayscale(1);opacity:.48}
+#mowerDialog .mower-card .mower-preview{border-radius:2px;background:transparent}
+#mowerDialog .mower-state{font-size:12px;min-height:34px;color:#40533a}
+#mowerDialog .mower-card[data-selected=true] .mower-state{font-weight:700;color:#284b2f}
+#mowerDialog .mower-card button{border-radius:3px}
+#mowerDialog .mower-card button:disabled{color:#525e4a;background:#dfe3d6;border-color:#c7cfbe}

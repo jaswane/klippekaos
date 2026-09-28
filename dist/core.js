@@ -37,23 +37,30 @@ levels.garden3={id:'garden3',name:'Testhage 3 · Kurvehagen',
  obstacles,pickups:[{type:'speed',x:190,y:300},{type:'turn',x:690,y:300}],timeTarget:210,start:{x:165,y:405},
  heavy:[{x:380,y:405,rx:100,ry:56}],wildflowers:[{x:615,y:195,rx:58,ry:40}]};
 
-// Career mechanics are explicit; later stages define their own open garden geometry.
+// Career geometry is independent of the test gardens; early cats are late and infrequent.
 const careerLevels={};
 const careerSpecs=[
- ['Den lille hagen','garden1',false,true,false,false,'Finn styringen · pass på katten når du varsles'],
+ ['Den lille hagen','garden1',false,true,false,false,'Finn styringen · klipp den lille plenen'],
  ['L-hagen','garden2',true,true,false,false,'Mørkt gress bremser klipperen litt'],
  ['Kurvehagen','garden3',false,true,false,false,'Pass på katten · treff avslutter runden'],
  ['Blomsterhagen','garden3',false,true,true,false,'La markblomstene stå · de teller ikke som plen'],
  ['Sommerhagen','garden3',false,true,false,true,'Jordveps! Kjør unna når du varsles']
 ];
-const careerCatSettings=[{enabled:true,first:30,cooldown:28,maxPasses:2},{enabled:true,first:25,cooldown:22,maxPasses:2},{enabled:true,first:18,cooldown:17,maxPasses:3},{enabled:true,first:18,cooldown:16,maxPasses:3},{enabled:true,first:18,cooldown:13.5,maxPasses:4}];
+const careerCatSettings=[{enabled:true,first:33,cooldown:28,maxPasses:1},{enabled:true,first:26,cooldown:22,maxPasses:2},{enabled:true,first:18,cooldown:17,maxPasses:3},{enabled:true,first:18,cooldown:16,maxPasses:3},{enabled:true,first:18,cooldown:13.5,maxPasses:4}];
 careerSpecs.forEach(([name,source,heavy,cat,wildflowers,wasps,intro],i)=>{
  const base=levels[source],id='career'+(i+1);
  careerLevels[id]={...base,id,name,stage:i+1,intro,catSettings:{...careerCatSettings[i]},mechanics:{heavy,cat,wildflowers,wasps,damage:false,find:false,pickups:false},
  heavy:heavy?[{x:220,y:405,rx:95,ry:60}]:[],wildflowers:wildflowers?levels.garden3.wildflowers:[],pickups:[]};
 });
+Object.assign(careerLevels.career1,{
+ polygon:[[100,104],[692,104],[692,454],[100,454]],
+ obstacles:[obstacles[0],{type:'rect',x:552,y:344,w:112,h:62}],start:{x:124,y:430}
+});
+Object.assign(careerLevels.career2,{
+ polygon:[[90,80],[760,80],[760,300],[470,300],[470,500],[90,500]]
+});
 Object.assign(careerLevels.career4,{
- polygon:[[150,90],[750,90],[790,130],[790,450],[750,490],[150,490],[110,450],[110,130]],
+ polygon:[[140,80],[760,80],[800,120],[800,460],[760,500],[140,500],[100,460],[100,120]],
  obstacles:[{type:'circle',x:215,y:160,r:27},{type:'rect',x:650,y:150,w:112,h:62}],
  wildflowers:[{x:355,y:235,rx:42,ry:42},{x:550,y:355,rx:36,ry:36}],start:{x:160,y:440}
 });
@@ -61,9 +68,42 @@ Object.assign(careerLevels.career5,{
  polygon:[[62,54],[690,54],[838,140],[838,440],[730,526],[62,526]],
  obstacles:[{type:'circle',x:225,y:175,r:27},{type:'rect',x:675,y:365,w:112,h:62}],start:{x:101,y:482}
 });
+// Off-screen endpoints keep entry/exit clear; each line crosses the lawn and avoids solid obstacles.
+careerLevels.career1.catRoutes=[
+ {id:'west-east',from:[-30,282],to:[930,282]},
+ {id:'east-west',from:[930,430],to:[-30,430]},
+ {id:'north-south',from:[440,-30],to:[440,610]}
+];
+careerLevels.career2.catRoutes=[
+ {id:'west-east',from:[-30,280],to:[930,280]},
+ {id:'east-west',from:[930,452],to:[-30,452]},
+ {id:'north-south',from:[200,-30],to:[200,610]},
+ {id:'south-north',from:[510,610],to:[510,-30]}
+];
+careerLevels.career3.catRoutes=[
+ {id:'west-east',from:[-30,290],to:[930,290]},
+ {id:'east-west',from:[930,440],to:[-30,440]},
+ {id:'north-south',from:[455,-30],to:[455,610]},
+ {id:'south-north',from:[520,610],to:[520,-30]},
+ {id:'southwest-northeast',from:[-30,500],to:[930,60]}
+];
+careerLevels.career4.catRoutes=[
+ {id:'west-east',from:[-30,297],to:[930,297]},
+ {id:'east-west',from:[930,430],to:[-30,430]},
+ {id:'north-south',from:[455,-30],to:[455,610]},
+ {id:'south-north',from:[290,610],to:[290,-30]}
+];
+careerLevels.career5.catRoutes=[
+ {id:'west-east',from:[-30,290],to:[930,290]},
+ {id:'east-west',from:[930,455],to:[-30,455]},
+ {id:'north-south',from:[450,-30],to:[450,610]},
+ {id:'south-north',from:[560,610],to:[560,-30]},
+ {id:'southwest-northeast',from:[-30,490],to:[930,80]}
+];
 for(const level of Object.values(levels))level.mechanics={cat:true,wasps:true,heavy:!!level.heavy,wildflowers:!!level.wildflowers,damage:true,find:true,pickups:true};
 const catRoutes=[{id:'left-right',from:[-30,280],to:[930,280]}, {id:'right-left',from:[930,280],to:[-30,280]}, {id:'top-bottom',from:[450,-30],to:[450,610]}, {id:'diagonal',from:[-30,70],to:[930,510]}];
-function seededRoute(seed=0){let n=Number(seed)>>>0;n=Math.imul(n^(n>>>16),0x45d9f3b);n=Math.imul(n^(n>>>16),0x45d9f3b);return ((n^(n>>>16))>>>0)%catRoutes.length;}
+function seedHash(seed=0){let n=Number(seed)>>>0;n=Math.imul(n^(n>>>16),0x45d9f3b);n=Math.imul(n^(n>>>16),0x45d9f3b);return (n^(n>>>16))>>>0;}
+function seededRoute(seed=0){return seedHash(seed)%catRoutes.length;}
 function inPatch(x,y,patches=[]){return patches.some(p=>((x-p.x)/p.rx)**2+((y-p.y)/p.ry)**2<=1);}
 function wildflowerAt(x,y,garden){const l=levelFor(garden);return l.mechanics.wildflowers&&inPatch(x,y,l.wildflowers)&&inPolygon(x,y,l.polygon)&&l.obstacles.every(o=>distance(x,y,o)>P.trim);}
 // Explicit career milestones; art IDs follow the approved wheel/lever mapping, not file numbering.
@@ -87,6 +127,9 @@ class Game{
   this.find={x:210,y:382,revealed:false,collected:false};this.cat={x:-30,y:280,active:false,warned:false,finished:false,stopped:false,side:0};
   const route=catRoutes.find(r=>r.id===this.eventOptions.catRoute)||catRoutes[seededRoute(this.eventOptions.seed)];
   this.cat={...this.cat,variant:['blender','grey','tuxedo'][seededRoute((this.eventOptions.seed??0)^0x3197)%3],x:route.from[0],y:route.from[1],route,angle:Math.atan2(route.to[1]-route.from[1],route.to[0]-route.from[0])};
+  // Separate stream: changing cat choices cannot move hidden wasp nests or consume their randomness.
+  this.catRandom=seededRandom(seedHash((this.eventOptions.seed??0)^Math.imul(this.level.stage||0,0x45d9f3b)^0x3197));
+  if(this.level.catRoutes)this.chooseCatPass(false);
   this.heavyCut=0;this.heavyTotal=0;this.heavyLoad=0;this.flowerCut=0;this.flowerTotal=0;this.flowerNoticeAt=-Infinity;
   this.nx=P.width/P.cell;this.ny=P.height/P.cell;this.mask=new Uint8Array(this.nx*this.ny);this.last=new Float32Array(this.mask.length);this.last.fill(-1e6);this.terrain=new Uint8Array(this.mask.length);this.flowers=new Uint8Array(this.mask.length);
   for(let y=0;y<this.ny;y++)for(let x=0;x<this.nx;x++)if(mowable((x+.5)*P.cell,(y+.5)*P.cell,this.garden)){this.mask[y*this.nx+x]=1;this.total++;if(this.mechanics.heavy&&inPatch((x+.5)*P.cell,(y+.5)*P.cell,this.level.heavy)){this.terrain[y*this.nx+x]=1;this.heavyTotal++;}}
@@ -118,12 +161,21 @@ class Game{
   const score=Math.max(0,breakdown.base-breakdown.overlap-breakdown.collisions-breakdown.damage-breakdown.wasps-breakdown.flowers-breakdown.earlyFinish);
   return {mode:this.mode,garden:this.garden,score,rank:score>=9000?'S':score>=7500?'A':score>=5500?'B':score>=3500?'C':'D',time:this.time,coverage,actualCoverage:this.coverage,overlap:this.overlap,collisions:this.collisions,damage:this.damage.length,failed,reason:this.reason,waspStings:this.waspStings,penalty:this.penalty,heavyCut:this.heavyCut,heavyTotal:this.heavyTotal,flowerCut:this.flowerCut,flowerTotal:this.flowerTotal,breakdown,completed};
  }
+ chooseCatPass(avoidPrevious=true){
+  const c=this.cat,routes=this.level.catRoutes;
+  if(!routes)return; // Test gardens retain their original round-stable routes and variants.
+  const available=routes.filter(r=>!avoidPrevious||r.id!==c.route.id),variants=['blender','grey','tuxedo'].filter(v=>!avoidPrevious||v!==c.variant);
+  const fixed=[...routes,...catRoutes].find(r=>r.id===this.eventOptions.catRoute);
+  const sampled=available[Math.floor(this.catRandom()*available.length)],route=fixed||sampled;
+  c.route=route;c.variant=variants[Math.floor(this.catRandom()*variants.length)];
+  c.x=route.from[0];c.y=route.from[1];c.angle=Math.atan2(route.to[1]-route.from[1],route.to[0]-route.from[0]);
+ }
  updateCat(dt,events){
   const c=this.cat;if(!this.mechanics.cat||!this.catSettings.enabled||!this.started||this.catPasses>=this.catSettings.maxPasses)return;
   const pending=this.waspNests.some(n=>n.state==='queued');
   // An already warned cat keeps the slot; queued nests take priority before the next warning.
   if(!c.active&&(!c.warned||c.finished)&&(this.nest.active||pending||this.time<this.hazardUntil)){this.nextCatAt=Math.max(this.nextCatAt,this.time+eventTuning.catWarning);return;}
-  if(c.finished){if(this.time<this.nextCatAt-eventTuning.catWarning)return;c.finished=false;c.warned=false;c.x=c.route.from[0];c.y=c.route.from[1];}
+  if(c.finished){if(this.time<this.nextCatAt-eventTuning.catWarning)return;this.chooseCatPass();c.finished=false;c.warned=false;c.x=c.route.from[0];c.y=c.route.from[1];}
   if(this.time>=this.nextCatAt-eventTuning.catWarning&&!c.warned){c.warned=true;events.push('cat-warning');}
   if(this.time<this.nextCatAt)return;c.active=true;
   const r=c.route,length=Math.hypot(r.to[0]-r.from[0],r.to[1]-r.from[1]),ux=(r.to[0]-r.from[0])/length,uy=(r.to[1]-r.from[1])/length;
